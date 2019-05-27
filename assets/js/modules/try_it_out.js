@@ -29,12 +29,14 @@ const try_it_out = (function(){
         }
         select.on('change',function(event){
           editor.replaceSelection(`${event.target.value}`)
+          $('#editorSuggest').html('')
         })
         $('#editorSuggest').append(select)
       }
       setInterval(() => {
         let editorSelected = editor.somethingSelected()
-         editor.somethingSelected() ? editorSelection() : $('#editorSuggest').html('');
+         //editor.somethingSelected() ? editorSelection() : $('#editorSuggest').html('');
+         if(editor.somethingSelected()) editorSelection()
       }, 1000);
 
       //console.log(editor.getValue())
