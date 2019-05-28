@@ -6,7 +6,7 @@ const demo = (function(){
   const codemirror = () => {
     const editor = CodeMirror.fromTextArea(
       document.querySelector("textarea.code"),
-      { lineNumbers: true, mode:  "javascript" }
+      { lineNumbers: false, mode:  "javascript" }
     );
 
     return editor
