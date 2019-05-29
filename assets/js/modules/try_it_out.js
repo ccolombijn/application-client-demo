@@ -49,8 +49,12 @@ const try_it_out = (function(){
          if(editorJs.somethingSelected()) editorSelection()
          input = editorJs.getValue()
          if($('div.output').html()!=html){
+           $('#updateBtn').html('<i class="fas fa-sync fa-spin"></i> Updating...').addClass('text-muted')
+           setTimeout(()=>$('#updateBtn').html('<i class="fas fa-sync"></i> Update HTML').removeClass('text-muted'),2000)
            html = $('div.output').html();
            editorHtml.setValue(html);
+         }else{
+
          }
       }, 500);
 
