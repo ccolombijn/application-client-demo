@@ -6,4 +6,4 @@ updateHeader.addEventListener('input', (event) => {
    // Pas name property aan met waarde van input
    application.object[application.route()].name = event.target.value;
    application.render(); // render in event
-}
+});
