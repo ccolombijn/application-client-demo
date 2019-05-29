@@ -9,6 +9,7 @@ const application = (function(){
   let config, // configuration object
       applicationObject, // application object
       output, // private output
+      position = 0, // private global position
       previous; // previous object state
   const defaults = {
     template : 'pageLayout',
@@ -27,11 +28,24 @@ const application = (function(){
 
   add = function(name,module) {
     // adds property to application object
-    const obj = applicationObject ? applicationObject : {}
-    obj[name] = module;
-    applicationObject = obj;
-    application.object = applicationObject;
-    return module;
+    if(module){
+      const obj = applicationObject ? applicationObject : {}
+      obj[name] = module;
+      console.log(`application.add : ${name} added`)
+      applicationObject = obj;
+      application.object = applicationObject;
+      return module;
+    }else{
+      if(position===0){ // listen to global position
+        $.get(`js/modules/${name}.js`)
+      }else{ // queue with promise in $.get.done & global position
+        $.get(`js/modules/${name}.js`).done(()=>{
+          position--;
+          add(config.modules[(config.modules.length-position)]);
+        });
+      }
+    }
+
   },
 
 //..............................................................................
@@ -45,28 +59,46 @@ const application = (function(){
   },
 
 //..............................................................................
-
+  initModules = (modules) => {
+    if(typeof modules === 'array'){ // property should be array
+      position = modules.length; // set global position
+      add(modules[0]);
+    }
+  },
   init = ( _application ) => { // initialize application
     // assigns given, existing or merged application object
     if( _application && applicationObject ){ // checks if application object exists
-      for( let property in applicationObject){
-        if(!applicationObject[property])
-          applicationObject[property] = _application[property];
+      if(typeof _application === 'function'){
+         _application()
+      }else{
+        for( let property in applicationObject){
+          if(!applicationObject[property])
+            applicationObject[property] = _application[property];
+        }
       }
+
     } else if (_application) {
       applicationObject = _application; // use given object
     } else {
       applicationObject = application.object; // use existing object
     }
     config = applicationObject.config; // get config object
+    if(config.modules) initModules(config.modules)
     for(let property in config){
       if(config[property].includes('#')) element[property] = $(config[property])
     }
     element['content'] = $('div.content')
     application.config = config; // set config object of application object
     if(config.debug) console.log(`application.init : ${applicationObject.name}`);
-    load(); // call load; calls page & module
-    window.addEventListener( 'hashchange', () => load() ); // attach load to hashchange event
+    try{
+      setTimeout( () => load(), 500) // call load; calls page & module
+      window.addEventListener( 'hashchange', () => load() ); // attach load to hashchange event
+    }catch(error){
+      console.error(error); // default module undefined
+    }
+
+
+
 
   },
 
@@ -78,11 +110,18 @@ const application = (function(){
     const _endpoint = endpoint();
     const _method = _route[1];
     const _argument = _route[2];
+    if(!applicationObject[_endpoint])
+      throw `application.load : requested module ${_endpoint} undefined; modules loaded : ${application.modules().join(',')}`
     const _module = _method ? applicationObject[_endpoint][_method] // module method
-      : applicationObject[_endpoint].default // module default
+        : applicationObject[_endpoint].default // module default
+
+
+
+
     if(config.debug) console.log(`application.load : ${_route.join('/')}`);
 
     page( () => // call page
+
       _module(_argument) // call module
     );
   },
@@ -235,7 +274,7 @@ const application = (function(){
     const arrModules = [];
     for(let module of Object.getOwnPropertyNames(application.object)){
       // check if application object property is module; exclude default module
-      if(applicationObject[module].default && module != config.default){
+      if(applicationObject[module].default && module != 'config'){
         arrModules.push( module );
       }
     }

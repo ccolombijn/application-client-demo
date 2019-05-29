@@ -62,3 +62,14 @@ select#objSelect{ font-size: 18px; font-family: 'Inconsolata'}
 .number { color: 'red' }
 .key { color: 'purple' }
 .string { color: 'green' }
+.CodeMirror{
+  font-size: large;
+
+
+}
+.hover:hover {
+  background-color: #eee;
+}
+.pointer {
+  cursor: pointer;
+}

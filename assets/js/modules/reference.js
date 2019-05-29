@@ -68,7 +68,7 @@ const reference = (function(){
       objSelect.on('change', (event) => printObjTable(event.target.value,objs[event.target.value]));
       //application.event(objSelect,'change', (event) => printObjTable(event.target.value,objs[event.target.value]));
       objSelect.prepend($('<option selected disabled>Select Object to view properties...</option>'));
-      $(application.config.main).prepend(objSelect)
+      $('div.content').before(objSelect)
     },
     color : 'SeaGreen'
   });

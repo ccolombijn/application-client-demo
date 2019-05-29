@@ -1,20 +1,32 @@
 const try_it_out = (function(){
+  let input,html
   const objs = {
     'application' : application,
     'application.object' : application.object,
     'application.config' : application.config,
     'application.element' : application.element,
     'utils' : utils
-  }
+  },
+  examples = [ 'updateHeader','addModule']
   application.add('try_it_out',{
     name : 'Try it out',
     default : () => {
-      const editor = demo.editor();
+      //if(input) $('#codeInput').innerHTML = input
+      if(!input) input = $('#codeInput').val()
+      if(!html) html = $('div.output').html()
+      const editorJs = demo.editor('javascript');
+      editorJs.setValue(input);
+      const editorHtml = demo.editor('htmlmixed');
+      editorHtml.setValue(html);
       let selection
+      const codeInput = $('#codeInput').on('change',function(event){
+        input = editorJs.getValue()
+      });
+      if(input) $('#codeInput').innerHTML = input
       const editorSelection = function(){
 
-        if(selection != editor.getSelection()){
-          selection = editor.getSelection();
+        if(selection != editorJs.getSelection()){
+          selection = editorJs.getSelection();
           if(objs[selection]) editorSuggest(selection);
         }
       }
@@ -28,34 +40,65 @@ const try_it_out = (function(){
           select.append(option)
         }
         select.on('change',function(event){
-          editor.replaceSelection(`${event.target.value}`)
+          editorJs.replaceSelection(`${event.target.value}`)
           $('#editorSuggest').html('')
         })
         $('#editorSuggest').append(select)
       }
       setInterval(() => {
-        let editorSelected = editor.somethingSelected()
-         //editor.somethingSelected() ? editorSelection() : $('#editorSuggest').html('');
-         if(editor.somethingSelected()) editorSelection()
+         if(editorJs.somethingSelected()) editorSelection()
+         input = editorJs.getValue()
       }, 1000);
-
-      //console.log(editor.getValue())
 
 
       const executeCode = function(){
+        console.log('executeCode')
         try{
-          let executeOutput = eval(editor.getValue());
+          let executeOutput = eval(editorJs.getValue());
+
           application.render();
+          editorHtml.setValue($('div.output').html())
+
           if(typeof executeOutput === 'object') executeOutput = JSON.stringify(executeOutput)
           if(typeof executeOutput === 'array') executeOutput = `[${executeOutput.join(',')}]`
           if(executeOutput === '') executeOutput = '// No output'
-          if(!executeOutput) executeOutput = '// No output'
+          if(!executeOutput) executeOutput = '// Output undefined'
           $('#output code').html(executeOutput)
         }catch(error){
           $('#output code').html(error)
         }
       }
       const executeBtn = $('#executeBtn').on('click',executeCode);
+      const updateHTML = ()=> $('div.output').html(editorHtml.getValue());
+      const updateBtn = $('#updateBtn').on('click',updateHTML);
+      const examplesPanel = $('#examplesPanel')
+      const insertExample = function(event){
+
+        const example = event.target.id
+        $.ajax({
+          url : `js/examples/${example}.js.txt`,
+          success : function(data){
+            console.log('insertExample')
+            editorJs.setValue(data.toString());
+
+          }
+
+        });
+        //$.get(`js/examples/${example}.js`, function(data){
+        //  editorJs.setValue(data.toString());
+        //});
+      }
+
+      for(let example of examples){
+        example = $(`<li id="${example}" class="list-group-item Inconsolata hover pointer">${example}</li>`);
+        example.on('click',(event) => {
+          insertExample(event)
+        })
+        examplesPanel.append(example)
+
+      }
+
+
     },
     template : 'try_it_out',
     color : 'Chocolate'

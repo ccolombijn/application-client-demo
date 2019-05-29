@@ -4,18 +4,70 @@
 
   </div>
   <div id="output">
+    <div class="output">
+      <p>HTML Output</p>
+    </div>
     <code>//Output</code>
   </div>
-  <div id="editorSuggest">
-    
+
+  <div class="row">
+    <div class="col-md-2">
+      <h4>Load Example</h4>
+      <ul  class="list-group shadow" id="examplesPanel">
+
+      </ul>
+    </div>
+    <div class="col-md-5">
+      <div class="card shadow">
+  <div class="card-header">
+    <i class="fab fa-js-square"></i> JavaScript
   </div>
-  <textarea class="code" style="height:225px;">
-    /* Type some code & hit Execute to run code
-    * Some examples;
-    * application.route() // returns current route
-    * application.object // returns application object
-    */
-  </textarea>
-  <button class="btn btn-primary" id="executeBtn">Execute</button>
+  <div class="card-body">
+    <div id="editorSuggest">
+
+    </div>
+    <textarea class="javascript" id="codeInput" style="height:225px;" autofocus>
+/* Type some code & hit Execute to run code
+* Some examples;
+* application.route() // returns current route
+* application.object // returns application object
+*/
+application.object[application.route()].output = '<p>Some value for output</p>';
+    </textarea>
+
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-primary" id="executeBtn"><i class="fas fa-external-link-alt"></i> Run Code</button>
+  </div>
+</div>
+
+
+
+
+    </div>
+    <div class="col-md-5">
+      <div class="card shadow">
+  <div class="card-header">
+    <i class="fas fa-code"></i> HTML
+  </div>
+  <div class="card-body">
+    <div id="editorSuggest">
+
+    </div>
+    <textarea class="htmlmixed" id="htmlInput" style="height:225px;">
+      <!-- HTML -->
+    </textarea>
+  </div>
+  <div class="card-footer">
+    <button class="btn btn-light" id="updateBtn"><i class="fas fa-sync"></i> Update HTML</button>
+  </div>
+</div>
+
+
+
+    </div>
+  </div>
+
+
 
 </div>

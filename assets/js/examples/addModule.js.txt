@@ -1,0 +1,12 @@
+// assets/js/examples/addModule.js
+const addModule = function(name,module){
+  application.add(name,module)
+  console.log('addModule')
+  return 'addModule executed'
+}
+const exampleModule = {
+  name : 'Example',
+  content : 'Content of example',
+  default : () => console.log('This is a example')
+}
+addModule('example',exampleModule)
