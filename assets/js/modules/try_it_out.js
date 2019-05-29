@@ -80,7 +80,10 @@ const try_it_out = (function(){
           success : function(data){
 
             editorJs.setValue(data.toString());
-            $.get(`html/examples/${example}.html`,(data)=> editorHtml.setValue(data) )
+            $.get(`html/examples/${example}.html`,(data)=> {
+              editorHtml.setValue(data) ;
+              $('div.output').html(data);
+            })
           }
 
         });
