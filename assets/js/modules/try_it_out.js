@@ -48,7 +48,11 @@ const try_it_out = (function(){
       setInterval(() => {
          if(editorJs.somethingSelected()) editorSelection()
          input = editorJs.getValue()
-      }, 1000);
+         if($('div.output').html()!=html){
+           html = $('div.output').html();
+           editorHtml.setValue(html);
+         }
+      }, 500);
 
 
       const executeCode = function(){
@@ -82,6 +86,7 @@ const try_it_out = (function(){
             editorJs.setValue(data.toString());
             $.get(`html/examples/${example}.html`,(data)=> {
               editorHtml.setValue(data) ;
+              html = data;
               $('div.output').html(data);
             })
           }
