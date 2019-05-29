@@ -78,9 +78,9 @@ const try_it_out = (function(){
         $.ajax({
           url : `js/examples/${example}.js.txt`,
           success : function(data){
-            console.log('insertExample')
-            editorJs.setValue(data.toString());
 
+            editorJs.setValue(data.toString());
+            $.get(`html/examples/${example}.html`,(data)=> editorHtml.setValue(data) )
           }
 
         });
