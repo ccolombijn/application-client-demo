@@ -3,6 +3,7 @@
 */
 'use strict'
 const reference = (function(){
+
   const objs = {
     'application' : application,
     'application.object' : application.object,
@@ -21,16 +22,19 @@ const reference = (function(){
   const setAlert = (type,msg) => content.html(`<div class="alert alert-${type}" role="alert">${msg}</div>`);
 
   const getStr = (obj,property) => typeof obj[property] === 'function' ?
-    utils.format(obj[property].toString())
-    : utils.syntaxHighlight(JSON.stringify(obj[property], null, 2));
+    `<pre class="brush : js">${utils.format(obj[property].toString())}</pre>`
+    : `<code>${JSON.stringify(obj[property], null, 2)}</code>`;
 
   const checkOccurence = function(obj,method){
-    const occurenceObj = {};
-    for(let property of props(obj)){
-      let occurence = utils.occurence(getStr(obj,property),method);
-      if(occurence>0 && method != property ) occurenceObj[property] = occurence;
+    if(method){
+      const occurenceObj = {};
+      for(let property of props(obj)){
+        let occurence = utils.occurence(getStr(obj,property),method);
+        if(occurence>0 && method != property ) occurenceObj[property] = occurence;
+      }
+      return occurenceObj
     }
-    return occurenceObj
+
   }
 
   const printObjTable = function(name,obj){
@@ -52,7 +56,8 @@ const reference = (function(){
       const method = event.target.parentElement.id.replace('method_','');
       $('.modal-title').html(method).addClass('Inconsolata');
       $('.modal-body').html(`<code>${getStr(obj,method)}</code>`);
-      $('#modal').modal();
+      $('#modal').modal().on('shown.bs.modal', () => SyntaxHighlighter.all() );
+
     });
   }
 

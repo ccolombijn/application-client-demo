@@ -3,6 +3,7 @@
 */
 'use strict'
 const intro = (function(){
+  
   application.add('intro',{
     name : 'Intro',
     default : () => console.log('This is intro!'),

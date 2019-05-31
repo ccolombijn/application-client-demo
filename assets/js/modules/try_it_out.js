@@ -1,5 +1,6 @@
 const try_it_out = (function(){
-  let input,html
+  //let input,html
+
   const objs = {
     'application' : application,
     'application.object' : application.object,
@@ -7,22 +8,43 @@ const try_it_out = (function(){
     'application.element' : application.element,
     'utils' : utils
   },
+
   examples = [ 'updateHeader','addModule']
+  let sync
   application.add('try_it_out',{
     name : 'Try it out',
-    default : () => {
+    default : function try_editor(){
+
       //if(input) $('#codeInput').innerHTML = input
-      if(!input) input = $('#codeInput').val()
-      if(!html) html = $('div.output').html()
+      //if(!input) input = $('#codeInput').val()
+      //if(!html || html != $('div.output').html()) html = $('div.output').html()
+      const obj = application.object.try_it_out;
+
+
       const editorJs = demo.editor('javascript');
-      editorJs.setValue(input);
+      if(obj.input)editorJs.setValue(obj.input);
+
       const editorHtml = demo.editor('htmlmixed');
-      editorHtml.setValue(html);
+      if(!obj.htmlinput && $('div.output')) obj.htmlinput =$('div.output').html()
+      if(obj.htmlinput)editorHtml.setValue(obj.htmlinput);
       let selection
-      const codeInput = $('#codeInput').on('change',function(event){
-        input = editorJs.getValue()
-      });
-      if(input) $('#codeInput').innerHTML = input
+      //if(!sync){
+        if(sync) clearInterval(sync)
+        sync = setInterval(() => {
+          if(application.endpoint()==='try_it_out'){
+            if(editorJs.somethingSelected()) editorSelection()
+            if($('div.output').html()!= obj.htmlinput) {
+              obj.htmlinput = $('div.output').html()
+              try{
+                if(editorHtml && obj.htmlinput) editorHtml.setValue(obj.htmlinput);
+              }catch(error){
+                console.warn(`editorHtml.setValue error : ${error}`)
+              }
+            }
+          }
+
+       }, 500);
+      //}
       const editorSelection = function(){
 
         if(selection != editorJs.getSelection()){
@@ -45,18 +67,7 @@ const try_it_out = (function(){
         })
         $('#editorSuggest').append(select)
       }
-      setInterval(() => {
-         if(editorJs.somethingSelected()) editorSelection()
-         input = editorJs.getValue()
-         if($('div.output').html()!=html){
-           $('#updateBtn').html('<i class="fas fa-sync fa-spin"></i> Updating...').addClass('text-muted')
-           setTimeout(()=>$('#updateBtn').html('<i class="fas fa-sync"></i> Update HTML').removeClass('text-muted'),2000)
-           html = $('div.output').html();
-           editorHtml.setValue(html);
-         }else{
 
-         }
-      }, 500);
 
 
       const executeCode = function(){
@@ -65,7 +76,8 @@ const try_it_out = (function(){
           let executeOutput = eval(editorJs.getValue());
 
           application.render();
-          editorHtml.setValue($('div.output').html())
+          obj.htmlinput = $('div.output').html()
+          editorHtml.setValue(obj.htmlinput)
 
           if(typeof executeOutput === 'object') executeOutput = JSON.stringify(executeOutput)
           if(typeof executeOutput === 'array') executeOutput = `[${executeOutput.join(',')}]`
@@ -77,7 +89,11 @@ const try_it_out = (function(){
         }
       }
       const executeBtn = $('#executeBtn').on('click',executeCode);
-      const updateHTML = ()=> $('div.output').html(editorHtml.getValue());
+      const updateHTML = ()=> {
+        obj.htmlinput = editorHtml.getValue()
+        $('div.output').html(obj.htmlinput);
+      }
+
       const updateBtn = $('#updateBtn').on('click',updateHTML);
       const examplesPanel = $('#examplesPanel')
       const insertExample = function(event){
@@ -90,7 +106,7 @@ const try_it_out = (function(){
             editorJs.setValue(data.toString());
             $.get(`html/examples/${example}.html`,(data)=> {
               editorHtml.setValue(data) ;
-              html = data;
+              obj.htmlinput = data;
               $('div.output').html(data);
             })
           }

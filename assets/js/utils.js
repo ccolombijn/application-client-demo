@@ -29,7 +29,12 @@ const utils = (function(){
   format = (str) => {
     return str.replace(new RegExp('    ', 'g'), '<i></i>').replace(/(?:\r\n|\r|\n)/g, '<br>');
   },
-  occurence = (str,find) => (str.match(new RegExp(`${find}`,'g')) || []).length,
+  occurence = (str,find) => {
+    if(str) {
+      return (str.match(new RegExp(`${find}`,'g')) || []).length
+    }
+
+  },
   syntaxHighlight = (json) => {
     if (typeof json != 'string') {
          json = JSON.stringify(json, undefined, 2);

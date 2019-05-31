@@ -1,9 +1,4 @@
 // assets/js/examples/updateHeader.js
 
-const updateHeader = document.querySelector('#updateHeader');
-updateHeader.value = application.object[application.route()].name;
-updateHeader.addEventListener('input', (event) => {
-   // Pas name property aan met waarde van input
-   application.object[application.route()].name = event.target.value;
-   application.render(); // render in event
-});
+// Pas name property aan met waarde van input
+application.controller('#updateHeader','input','name');

@@ -10,6 +10,8 @@ const application = (function(){
       applicationObject, // application object
       output, // private output
       position = 0, // private global position
+      ready = false, // private ready state
+      loadModules,
       previous; // previous object state
   const defaults = {
     template : 'pageLayout',
@@ -23,7 +25,12 @@ const application = (function(){
 
   templates = {},
   element = {},
-
+  elements = () => {
+    for(let property in config)
+      if(config[property].includes('#') ) element[property] = $(config[property]);
+  
+    return element
+  },
 //..............................................................................
 
   add = function(name,module) {
@@ -31,19 +38,12 @@ const application = (function(){
     if(module){
       const obj = applicationObject ? applicationObject : {}
       obj[name] = module;
-      console.log(`application.add : ${name} added`)
+
       applicationObject = obj;
       application.object = applicationObject;
       return module;
     }else{
-      if(position===0){ // listen to global position
-        $.get(`js/modules/${name}.js`)
-      }else{ // queue with promise in $.get.done & global position
-        $.get(`js/modules/${name}.js`).done(()=>{
-          position--;
-          add(config.modules[(config.modules.length-position)]);
-        });
-      }
+      require(name);
     }
 
   },
@@ -59,11 +59,24 @@ const application = (function(){
   },
 
 //..............................................................................
-  initModules = (modules) => {
-    if(typeof modules === 'array'){ // property should be array
-      position = modules.length; // set global position
-      add(modules[0]);
-    }
+require = (name,callback) => {
+  $.get(`js/modules/${name}.js`).done(() => {
+    if(callback)callback()
+  });
+},
+//..............................................................................
+  initModules = () => {
+    require(config.modules[position], () =>{
+      if(position === config.modules.length-1){
+        load()
+        window.addEventListener( 'hashchange', () => load() );
+      } else {
+        position++;
+        initModules()
+      }
+    });
+
+//..............................................................................
   },
   init = ( _application ) => { // initialize application
     // assigns given, existing or merged application object
@@ -83,35 +96,32 @@ const application = (function(){
       applicationObject = application.object; // use existing object
     }
     config = applicationObject.config; // get config object
-    if(config.modules) initModules(config.modules)
-    for(let property in config){
-      if(config[property].includes('#')) element[property] = $(config[property])
+    if(config.modules) {
+      loadModules = new Set(config.modules).values()
+      initModules(loadModules);
+    }else{
+      setTimeout( () => load(), 500) // call load; calls page & module; application.oject should be ready & complete...
+      //load()
+      window.addEventListener( 'hashchange', () => load() );
     }
-    element['content'] = $('div.content')
     application.config = config; // set config object of application object
     if(config.debug) console.log(`application.init : ${applicationObject.name}`);
-    try{
-      setTimeout( () => load(), 500) // call load; calls page & module
-      window.addEventListener( 'hashchange', () => load() ); // attach load to hashchange event
-    }catch(error){
-      console.error(error); // default module undefined
-    }
-
-
-
 
   },
 
 //..............................................................................
 
-  load = () => {
+  load = async function() {
+  //load = () => {
     // calls module with current route in callback of page call
     const _route = route();
     const _endpoint = endpoint();
     const _method = _route[1];
     const _argument = _route[2];
-    if(!applicationObject[_endpoint])
-      throw `application.load : requested module ${_endpoint} undefined; modules loaded : ${application.modules().join(',')}`
+
+    await ready
+    if(!applicationObject[_endpoint]) // requested module does not exist
+      throw `application.load : requested module ${_endpoint} undefined; modules loaded : ${modules().join(',')}`
     const _module = _method ? applicationObject[_endpoint][_method] // module method
         : applicationObject[_endpoint].default // module default
 
@@ -120,23 +130,24 @@ const application = (function(){
 
     if(config.debug) console.log(`application.load : ${_route.join('/')}`);
 
-    page( () => // call page
+    page( function() {// call page
+      //_module(_argument)
 
-      _module(_argument) // call module
-    );
+      _module(_argument); // call module
+
+    });
   },
 
 //..............................................................................
 
   page = ( callback ) => {
     // displays page from template, execute callback and call render
-
-    element.main.fadeOut(400,() => { // page transition out
-      //$(config.main).load(`html/templates/${template()}.html`,function() {
+    // view.main doesn't exist after first render
+    $(config.main).fadeOut(400,() => { // page transition out
       template( () => { // load template file
         if(callback) callback(); // callback (module)
         render(); // render document
-        element.main.fadeIn(); // page transition in
+        view.main.fadeIn(); // page transition in
 
       });
     });
@@ -165,7 +176,9 @@ const application = (function(){
       if(config.debug) console.log(`application.page : ${_route}`);
       $.get( `html/templates/${_template}.html`, function( data ) { // get file
         templates[_template] = data; // add to templates object
-        if(html) element.main.html(data);
+        if(html) $(config.main).html(data); // view.main doesn't exist after first render
+
+      }).done(() =>{ // callback in promise
         if(callback) callback();
       });
     }else{
@@ -194,9 +207,10 @@ const application = (function(){
     //if(prev != application.object ){
       let thisObj = application.object[_route]
       $(`#${_template} h2`).html(thisObj.name); // set template header title
-      if(config.nav) nav(); // set navigation
-      title(_route); // set document title
 
+      title(_route); // set document title
+      elements();
+      if(config.nav) nav(); // set navigation
       for(let property in applicationObject[_route]){
         if(typeof applicationObject[_route][property] === 'string' ){
           // set values of properties of elements with corresponding class names
@@ -238,7 +252,7 @@ const application = (function(){
     if(config.style && applicationObject[endpoint()].color ) {
       $( active ).attr('style',`${str(config.style)}`);
     }
-    return element.nav;
+    return view.nav;
   },
 
 //..............................................................................
@@ -256,14 +270,31 @@ const application = (function(){
 
 //..............................................................................
 
-  event = (_element, event, callback ) => {
+  event = (_element, _event, callback ) => {
     // adds event to events object
     if(typeof _element === 'string')
-      element[_element] ? _element = element[_element] : _element = $(element);
-
+      element[_element] ? _element = element[_element] : _element = $(_element);
+    if(typeof callback === 'string'){
+      let property = callback
+      let target = property.includes('.') ?
+      applicationObject[property.split('.')[0]][property.split('.')[1]]
+      : module()[property]
+      _element.val(target)
+      callback = (event) => {
+        property.includes('.') ? applicationObject[property.split('.')[0]][property.split('.')[1]] = event.target.value
+        : module()[property] = event.target.value
+      }
+    }
     let id = _element.attr('id');
-    if(!events[id]) events[id] = () => _element.on(event,callback)
-    return events[id]
+    //if(!events[id]) events[id] = () => {
+      _element.on(_event,(event) => {
+        callback(event)
+        render() // event render
+      })
+
+    //}
+    let _events = id ?  events[id] : events
+    return _events
   },
   events = {},
 
@@ -271,15 +302,19 @@ const application = (function(){
 
   modules = function(){
     // get modules as array
-    const arrModules = [];
-    for(let module of Object.getOwnPropertyNames(application.object)){
-      // check if application object property is module; exclude default module
-      if(applicationObject[module].default && module != 'config'){
-        arrModules.push( module );
+    let _modules
+    //if(config.modules){
+    //  _modules = config.modules
+    //} else {
+      _modules = [];
+      for(let property of Object.getOwnPropertyNames(application.object)){
+        let obj = applicationObject[property];
+        if(typeof obj.default === 'function' ) _modules.push(property)
       }
-    }
-    return arrModules;
+    //}
+    return _modules;
   },
+  module = () => applicationObject[route()],
 
 
 //..............................................................................
@@ -293,7 +328,10 @@ const application = (function(){
       }
 
     return str
-  }
+  },
+  model = applicationObject,
+  view = element,
+  controller = event
 
 
   // return public methods & variables
@@ -301,17 +339,22 @@ const application = (function(){
     route : route,
     endpoint : endpoint,
     object : applicationObject,
+    model : model,
     modules : modules,
+    module : module,
     config : config,
+    require : require,
     add : add,
     remove : remove,
     init : init,
     load : load,
     event : event,
+    controller : controller,
     render : render,
     page : page,
     nav : nav,
     element : element,
+    view : view,
     template : template,
     templates : templates,
     title : title
