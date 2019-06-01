@@ -9,6 +9,7 @@ const reference = (function(){
     'application.object' : application.object,
     'utils' : utils,
     'jQuery' : jQuery,
+    'Backbone' : Backbone,
     'document' : document
   }
   //const obj = application.object.reference;

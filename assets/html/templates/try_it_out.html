@@ -4,9 +4,7 @@
 
   </div>
   <div id="output">
-    <div class="output">
-      <p class="example">HTML Output</p>
-    </div>
+    <div class="output"><p class="example">HTML Output</p></div>
     <code>//Output</code>
   </div>
 
@@ -17,10 +15,13 @@
 
       </ul>
     </div>
+  <div class="col-md-10"><div class="row">
+
+
     <div class="col-md-5">
       <div class="card shadow">
   <div class="card-header">
-    <i class="fab fa-js-square"></i> JavaScript
+    <i class="fab fa-js-square"></i> JavaScript <span class="exampleName text-black-50"></span>
   </div>
   <div class="card-body">
     <div id="editorSuggest">
@@ -32,23 +33,26 @@
 * application.route() // returns current route
 * application.object // returns application object
 */
-application.object[application.route()].example = 'Some value for example';
+application.object[application.route()]
+  === application.module(); // returns true
+application.module()
+  .example = 'Some value for example';
     </textarea>
 
   </div>
   <div class="card-footer">
-    <button class="btn btn-primary" id="executeBtn"><i class="fas fa-play"></i> Run Code</button>
+    <button class="btn btn-light" id="executeBtn"><i class="fas fa-play"></i> Run Code</button>
   </div>
+</div>
 </div>
 
 
 
+<div class="col-md-5">
 
-    </div>
-    <div class="col-md-5">
       <div class="card shadow">
   <div class="card-header">
-    <i class="fas fa-code"></i> HTML
+    <i class="fas fa-code"></i> HTML <span class="exampleName text-black-50"></span>
   </div>
   <div class="card-body">
     <div id="editorSuggest">
@@ -62,10 +66,11 @@ application.object[application.route()].example = 'Some value for example';
     <button class="btn btn-light" id="updateBtn"><i class="fas fa-sync"></i> Update HTML</button>
   </div>
 </div>
+</div>
+</div>
+</div>
 
 
-
-    </div>
   </div>
 
 

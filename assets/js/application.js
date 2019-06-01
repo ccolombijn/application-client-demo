@@ -10,12 +10,14 @@ const application = (function(){
       applicationObject, // application object
       output, // private output
       position = 0, // private global position
-      ready = false, // private ready state
+      ready, // private ready state
       loadModules,
       previous; // previous object state
+
   const defaults = {
     template : 'pageLayout',
-    filepath : 'html/templates/{template}.html'
+    templatePath : 'html/templates/{template}.html',
+
   }
   const route = () => // gets route from location.hash
     location.hash.slice(1).split('/');
@@ -27,13 +29,15 @@ const application = (function(){
   element = {},
   elements = () => {
     for(let property in config)
-      if(config[property].includes('#') ) element[property] = $(config[property]);
-  
+      if((typeof config[property] === 'string')
+      && config[property].includes('#') ) element[property] = $(config[property]);
+    if(config.debug) console.log(`application.elements`);
     return element
   },
 //..............................................................................
 
   add = function(name,module) {
+    //if(application.config.debug) console.log(`application.add : ${name}`);
     // adds property to application object
     if(module){
       const obj = applicationObject ? applicationObject : {}
@@ -60,19 +64,28 @@ const application = (function(){
 
 //..............................................................................
 require = (name,callback) => {
+  if(config.debug) console.log(`application.require : ${name}`);
   $.get(`js/modules/${name}.js`).done(() => {
     if(callback)callback()
+  }).fail(() => {
+    $.get(`${name}.js`).done(() => {
+      if(callback)callback()
+    }).fail(()=>{
+      console.error(`application.require : ${name} not available`)
+    });
   });
 },
 //..............................................................................
   initModules = () => {
-    require(config.modules[position], () =>{
+    require(config.modules[position], () =>{ // async request
       if(position === config.modules.length-1){
-        load()
-        window.addEventListener( 'hashchange', () => load() );
+        if(config.debug) console.log(`application.initModules : init load`);
+        load() // init load
+        $(window).on( 'hashchange', () => load() ); // event load
       } else {
-        position++;
-        initModules()
+        if(config.debug) console.log(`application.initModules : ${config.modules[position]} loaded`);
+        position++; // next position in modules array
+        initModules();
       }
     });
 
@@ -98,15 +111,18 @@ require = (name,callback) => {
     config = applicationObject.config; // get config object
     if(config.modules) {
       loadModules = new Set(config.modules).values()
-      initModules(loadModules);
+      initModules(loadModules); // async modules call with load in promise...
     }else{
-      setTimeout( () => load(), 500) // call load; calls page & module; application.oject should be ready & complete...
+      // call load; calls page & module; application.oject should be ready & complete...
+      // and in the right order... Let's wait 500 ms and hope everything is OK
+      setTimeout( () => load(), 500)
       //load()
       window.addEventListener( 'hashchange', () => load() );
     }
     application.config = config; // set config object of application object
     if(config.debug) console.log(`application.init : ${applicationObject.name}`);
-
+    if(config.debug) console.table(applicationObject);
+    return applicationObject
   },
 
 //..............................................................................
@@ -143,6 +159,7 @@ require = (name,callback) => {
   page = ( callback ) => {
     // displays page from template, execute callback and call render
     // view.main doesn't exist after first render
+    if(config.debug) console.log(`application.page`);
     $(config.main).fadeOut(400,() => { // page transition out
       template( () => { // load template file
         if(callback) callback(); // callback (module)
@@ -171,9 +188,9 @@ require = (name,callback) => {
     obj.template ? _template = obj.template : _template = config.template
 
     if(!templates[_template]){ // template is not available in templates object
-      if(!config.filepath) config.filepath = defaults.filepath; // get filepath
-      const templatePath = config.filepath.replace('{template}',_template);
-      if(config.debug) console.log(`application.page : ${_route}`);
+      if(!config.templatePath) config.templatePath = defaults.templatePath; // get filepath
+      const templatePath = config.templatePath.replace('{template}',_template);
+      if(config.debug) console.log(`application.template : ${_route}`);
       $.get( `html/templates/${_template}.html`, function( data ) { // get file
         templates[_template] = data; // add to templates object
         if(html) $(config.main).html(data); // view.main doesn't exist after first render
@@ -203,13 +220,13 @@ require = (name,callback) => {
     }
     if(!_route) _route = endpoint();
 
-    let _template = template(_route);
+    let _template = template(_route); // get template
     //if(prev != application.object ){
       let thisObj = application.object[_route]
       $(`#${_template} h2`).html(thisObj.name); // set template header title
 
       title(_route); // set document title
-      elements();
+      elements(); // set elements
       if(config.nav) nav(); // set navigation
       for(let property in applicationObject[_route]){
         if(typeof applicationObject[_route][property] === 'string' ){
@@ -225,6 +242,7 @@ require = (name,callback) => {
       previous = application.object
       if(callback) callback();
       for(let event in events) events[event]()
+      if(config.debug) console.log(`application.render : ${_route}`);
     //}
     return application
   },
@@ -284,6 +302,17 @@ require = (name,callback) => {
         property.includes('.') ? applicationObject[property.split('.')[0]][property.split('.')[1]] = event.target.value
         : module()[property] = event.target.value
       }
+    }else if (typeof callback === 'object') {
+      const obj = callback
+      callback = (event) => {
+        if(obj.api){ // bind api request to event
+          $.ajax(obj).done(()=>obj.callback());
+        }
+        if(event.target.class){
+          const property = event.target.class
+          if(event.target.value) obj[property] = event.target.value
+        }
+      }
     }
     let id = _element.attr('id');
     //if(!events[id]) events[id] = () => {
@@ -323,15 +352,19 @@ require = (name,callback) => {
     // replace {template} strings with module properties
     const obj = application.object[endpoint()]
     for(let item of Object.getOwnPropertyNames(obj))
-      if(typeof obj[item] === 'string' ){
-        if(str) str = str.replace(`{${item}}`,obj[item]);
-      }
+      if(typeof obj[item] === 'string' )
+        str = str.replace(new RegExp(`{${item}}`, 'g'),obj[item]);
+
+    for(let property of Object.getOwnPropertyNames(defaults))
+      str = str.replace(new RegExp(`{${property}}`, 'g'),defaults[property]);
 
     return str
   },
-  model = applicationObject,
+  model = {},
   view = element,
-  controller = event
+  controller = (_element, _event, callback ) => {
+    event(_element, _event, callback )
+  }
 
 
   // return public methods & variables
@@ -360,3 +393,4 @@ require = (name,callback) => {
     title : title
   }
 })();
+const ac = application;

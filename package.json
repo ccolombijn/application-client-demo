@@ -1,6 +1,6 @@
 {
-  "name": "agenda-manager",
-  "version": "0.1.0",
+  "name": "application-client-demo",
+  "version": "0.9.5",
   "description": "App for managing band",
   "main": "index.js",
   "scripts": {

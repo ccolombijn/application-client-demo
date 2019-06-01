@@ -16,10 +16,15 @@ const demo = (function(){
     const converter = new showdown.Converter();
     return converter;
   }
-  application.add('name','Application Client Demo');
-  application.add('editor',codemirror);
-  application.add('converter',showdown);
-  application.add('config',{
+  const backbone = () => {
+    return Backbone;
+  }
+
+  ac.add('name','Application Client Demo');
+  ac.add('editor',codemirror);
+  ac.add('converter',showdown);
+  ac.add('backbone',backbone);
+  ac.add('config',{
     modules : [
       'intro',
       'reference',
@@ -32,6 +37,5 @@ const demo = (function(){
     style : 'border-top: 3px solid {color}'
   });
 
-  application.init();
-  return application.object;
+  return ac.init();
 })()

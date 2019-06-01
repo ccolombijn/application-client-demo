@@ -9,7 +9,7 @@ const try_it_out = (function(){
     'utils' : utils
   },
 
-  examples = [ 'updateHeader','addModule']
+  examples = [ 'updateHeader','addModule','apiRequest','requireModule']
   let sync
   application.add('try_it_out',{
     name : 'Try it out',
@@ -34,12 +34,18 @@ const try_it_out = (function(){
           if(application.endpoint()==='try_it_out'){
             if(editorJs.somethingSelected()) editorSelection()
             if($('div.output').html()!= obj.htmlinput) {
+
+                $('#updateBtn').addClass('text-muted').html('<i class="fas fa-sync fa-spin"></i> Updaten...')
               obj.htmlinput = $('div.output').html()
               try{
                 if(editorHtml && obj.htmlinput) editorHtml.setValue(obj.htmlinput);
               }catch(error){
                 console.warn(`editorHtml.setValue error : ${error}`)
               }
+              setTimeout(() => {
+
+                  $('#updateBtn').removeClass('text-muted').html('<i class="fas fa-sync"></i> Update HTML')
+              },1000)
             }
           }
 
@@ -99,10 +105,13 @@ const try_it_out = (function(){
       const insertExample = function(event){
 
         const example = event.target.id
+        $('#examplesPanel li').removeClass('active')
+        $('.exampleName').html(example)
         $.ajax({
-          url : `js/examples/${example}.js.txt`,
+          url : `js/examples/${example}.js`,
+          dataType : 'html',
           success : function(data){
-
+            $(`#examplesPanel #${example}`).addClass('active')
             editorJs.setValue(data.toString());
             $.get(`html/examples/${example}.html`,(data)=> {
               editorHtml.setValue(data) ;
