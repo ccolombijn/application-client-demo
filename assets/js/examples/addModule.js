@@ -1,14 +1,16 @@
 // assets/js/examples/addModule.js
-const addModule = function(name,module){
-  module.default = () => console.log(module.default)
-  application.add(name,module)
-  console.log('addModule')
-  return 'addModule executed'
-}
-const exampleModule = {
-  name : 'Example',
-  content : 'Content of example',
-  default : 'This is a example'
-}
 
-addModule('example',exampleModule)
+application.controller('#addModuleBtn','click',()=>{
+    const name = $('#nameInput').val();
+    const consoleMsg = $('#consoleMsg').val();
+    const title = $('#titleInput').val();
+    const content = $('#contentInput').val();
+    application.add(name,{
+      name : name,
+      default : ()=>{
+        console.log(consoleMsg);
+      },
+      content : content
+    });
+  });
+// application.add('test',{name:'Test',content : 'Dit is content',default:()=>console.log('test')})

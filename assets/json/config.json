@@ -1,0 +1,19 @@
+{
+  "name" : "Application Client Demo",
+  "modules" : [
+    "intro",
+    "reference",
+    "try_it_out"
+  ],
+  "default" : "intro",
+  "defaults" : {
+    "template" : "pageLayout",
+    "templatePath" : "html/templates/{template}.html"
+  },
+  "main" : "section#mainContent",
+  "nav" : "nav#navMenu",
+  "template" : "pageLayout",
+  "style" : "border-top: 3px solid {color}",
+  "debug" : true
+
+}

@@ -20,22 +20,10 @@ const demo = (function(){
     return Backbone;
   }
 
-  ac.add('name','Application Client Demo');
-  ac.add('editor',codemirror);
-  ac.add('converter',showdown);
-  ac.add('backbone',backbone);
-  ac.add('config',{
-    modules : [
-      'intro',
-      'reference',
-      'try_it_out'
-    ],
-    default : 'intro',
-    main : 'section#mainContent',
-    nav : 'nav#navMenu',
-    template : 'pageLayout',
-    style : 'border-top: 3px solid {color}'
-  });
+  return{
+    editor : codemirror,
+    converter : showdown
+  }
 
-  return ac.init();
+
 })()
