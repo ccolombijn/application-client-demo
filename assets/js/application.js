@@ -42,11 +42,13 @@ const application = (function(){
   }, debugLog = [],
   element = {},
   elements = () => {
+    const isElement = (property) =>
+      (typeof config[property] === 'string')
+      && config[property].includes('#');
     for(let property in config)
-      if((typeof config[property] === 'string')
-      && config[property].includes('#') ) element[property] = $(config[property]);
+      if(isElement(property)) element[property] = $(config[property]);
     debug(`application.elements : ${Object.getOwnPropertyNames(element).join(',')}`);
-    return element
+    return element;
   },
 //..............................................................................
 
@@ -84,13 +86,14 @@ require = (name,callback) => {
 //..............................................................................
   initModules = () => {
     require(config.modules[position], () =>{ // async request
+      debug(`application.initModules : js/modules/${config.modules[position]}.js loaded`);
       if(position === config.modules.length-1){
-        debug(`application.initModules : ${config.modules[position]} loaded`);
+
         debug(`application.initModules complete : init load`);
         load() // init load
         $(window).on( 'hashchange', () => load() ); // event load
       } else {
-        debug(`application.initModules : ${config.modules[position]} loaded`);
+
         position++; // next position in modules array
         initModules();
       }
@@ -187,16 +190,7 @@ require = (name,callback) => {
 
 
     });
-    if(config.debug){
-      for(let item in debugLog){
-        if(debugLog[item].msg){
-          //console.log(`${debugLog[item].fn} : ${debugLog[item].msg}`);
-        }else{
-          //console.log(debugLog[item].fn);
-        }
 
-      }
-    }
   },
 
 //..............................................................................
@@ -204,9 +198,10 @@ require = (name,callback) => {
   page = ( callback ) => {
     // displays page from template, execute callback and call render
     // view.main doesn't exist before first render
-    debug(`application.page : ${endpoint()}`);
+
     $(config.main).fadeOut(400,() => { // page transition out
       template( () => { // load template file
+        debug(`application.page : ${config.main} #${template()}`);
         if(callback) callback(); // callback (module)
         render(); // render document
         view.main.fadeIn(); // page transition in
@@ -235,8 +230,9 @@ require = (name,callback) => {
     if(!templates[_template]){ // template is not available in templates object
       if(!config.templatePath) config.templatePath = defaults.templatePath; // get filepath
       const templatePath = config.templatePath.replace('{template}',_template);
-      debug(`application.template : ${_route}`);
+
       $.get( `html/templates/${_template}.html`, function( data ) { // get file
+        debug(`application.template : html/templates/${_template}.html loaded`);
         templates[_template] = data; // add to templates object
         if(html) $(config.main).html(data); // view.main doesn't exist after first render
 
@@ -252,7 +248,7 @@ require = (name,callback) => {
     }
 
 
-    return _template
+    return _template;
   },
 
 //..............................................................................
@@ -289,7 +285,7 @@ require = (name,callback) => {
       for(let event in events) events[event]()
       debug(`application.render : ${_route} complete`);
     //}
-    return application
+    return application;
   },
 
 //..............................................................................
@@ -312,7 +308,8 @@ require = (name,callback) => {
 
 
     }
-    debug(`application.nav : ${modules().join(',')}`);
+    let debugStr = modules().join(',').replace(endpoint(),`${endpoint()}(active)`)
+    debug(`application.nav : ${debugStr}`);
 
     const active = `${config.nav} li#${endpoint()} a`;
     $( active ).addClass('active');
@@ -327,11 +324,12 @@ require = (name,callback) => {
   title = (route) => {
     // sets document title with name property
     if(!route) route = endpoint();
-    debug(`application.title : ${route}`);
+
     let pageTitle = ( route === '') ?
     config.name
     : `${object[route].name} - ${config.name}`;
     $('title').html(pageTitle);
+    debug(`application.title : ${pageTitle}`);
     return pageTitle;
   },
 
