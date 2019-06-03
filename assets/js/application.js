@@ -7,7 +7,7 @@
 
 const application = (function(){
   let config, // configuration object
-      applicationObject = {}, // application object
+      object = {}, // application object
       output, // private output
       position = 0, // private global position
       ready, // private ready state
@@ -17,21 +17,32 @@ const application = (function(){
   const defaults = {
     template : 'pageLayout',
     templatePath : 'html/templates/{template}.html',
-
+    modulesPath : 'js/modules/{module}.js'
   }
   const route = () => // gets route from location.hash
     location.hash.slice(1).split('/');
 
   const endpoint = () => // gets default property of config if route not given
-    route()[0] ? route()[0] : config.default,
+    route()[0] ? route()[0] : config.default;
 
+  const debug = (fn,msg) => {
+    if(!msg){
+      if(typeof fn === 'string'){
+        fn = fn.split(' : ')[0]
+        msg = fn.split(' : ')[1]
+      }else if (typeof fn === 'object') {
 
+      }
+
+    }
+    debugLog.push({fn : fn,msg : msg})
+  }, debugLog = [],
   element = {},
   elements = () => {
     for(let property in config)
       if((typeof config[property] === 'string')
       && config[property].includes('#') ) element[property] = $(config[property]);
-    if(config.debug) console.log(`application.elements`);
+    debug(`application.elements : ${Object.getOwnPropertyNames(element).join(',')}`);
     return element
   },
 //..............................................................................
@@ -39,16 +50,8 @@ const application = (function(){
   add = function(name,module) {
     //if(application.config.debug) console.log(`application.add : ${name}`);
     // adds property to application object
-    if(module){
-      const obj = applicationObject ? applicationObject : {}
-      obj[name] = module;
-
-      applicationObject = obj;
-      application.object = applicationObject;
-      return module;
-    }else{
-      require(name);
-    }
+    module ? object[name] = module : require(name);
+    if(module) return module;
 
   },
 
@@ -57,14 +60,14 @@ const application = (function(){
   remove = function(property) {
     // removes property from application object
     const obj = {}
-    for(let _property in applicationObject)
+    for(let _property in object)
       if(_property != property ) obj[_property] = _property;
-    applicationObject = obj;
+    object = obj;
   },
 
 //..............................................................................
 require = (name,callback) => {
-  if(config.debug) console.log(`application.require : ${name}`);
+  debug(`application.require : ${name}`);
   $.get(`js/modules/${name}.js`).done(() => {
     if(callback)callback()
   }).fail(() => {
@@ -79,12 +82,12 @@ require = (name,callback) => {
   initModules = () => {
     require(config.modules[position], () =>{ // async request
       if(position === config.modules.length-1){
-        if(config.debug) console.log(`application.initModules : ${config.modules[position]} loaded`);
-        if(config.debug) console.log(`application.initModules complete : init load`);
+        debug(`application.initModules : ${config.modules[position]} loaded`);
+        debug(`application.initModules complete : init load`);
         load() // init load
         $(window).on( 'hashchange', () => load() ); // event load
       } else {
-        if(config.debug) console.log(`application.initModules : ${config.modules[position]} loaded`);
+        debug(`application.initModules : ${config.modules[position]} loaded`);
         position++; // next position in modules array
         initModules();
       }
@@ -95,14 +98,14 @@ require = (name,callback) => {
 
     $.get(`json/config.json`,(data) =>{
       config = data;
-      applicationObject.config = config;
-      if(config.debug) console.log(`initConfig : json/config.json loaded`);
-      if(config.debug) console.log(config);
+      object.config = config;
+      debug(`application.initConfig : json/config.json loaded`);
+      debug(config);
     }).done(() => {
 
     }).fail(() => {
-      if(applicationObject.config){
-        config = applicationObject.config; // get config object
+      if(object.config){
+        config = object.config; // get config object
       }else{
         throw 'initConfig : config not defined'
         return
@@ -115,24 +118,25 @@ require = (name,callback) => {
 //..............................................................................
   init = (( _application ) => { // initialize application
     // assigns given, existing or merged application object
-    if( _application && applicationObject ){ // checks if application object exists
+    if( _application && object ){ // checks if application object exists
       if(typeof _application === 'function'){
          _application()
       }else{
-        for( let property in applicationObject){
-          if(!applicationObject[property])
-            applicationObject[property] = _application[property];
+        for( let property in object){
+          if(!object[property])
+            object[property] = _application[property];
         }
       }
 
     } else if (_application) {
-      applicationObject = _application; // use given object
+      object = _application; // use given object
     } else {
       // BUG:
-      //applicationObject = application.object; // use existing object
+      //object = application.object; // use existing object
     }
-    //config = applicationObject.config; // get config object
+    //config = object.config; // get config object
     initConfig(()=>{
+      debug(`application.init : ${config.name}`);
       if(config.modules) {
         loadModules = new Set(config.modules).values()
         initModules(loadModules); // async modules call with load in promise...
@@ -144,11 +148,11 @@ require = (name,callback) => {
         window.addEventListener( 'hashchange', () => load() );
       }
       application.config = config; // set config object of application object
-      if(config.debug) console.log(`application.init : ${config.name}`);
+
 
 
     });
-    return applicationObject
+    return object
 
   })(),
 
@@ -163,12 +167,12 @@ require = (name,callback) => {
     const _argument = _route[2];
 
     await ready
-    if(!applicationObject[_endpoint]) // requested module does not exist
+    if(!object[_endpoint]) // requested module does not exist
       throw `application.load : requested module ${_endpoint} undefined; modules loaded : ${modules().join(',')}`
-    const _module = _method ? applicationObject[_endpoint][_method] // module method
-        : applicationObject[_endpoint].default // module default
+    const _module = _method ? object[_endpoint][_method] // module method
+        : object[_endpoint].default // module default
 
-    if(config.debug) console.log(`application.load : ${_module}`);
+    debug(`application.load : ${_module}`);
 
     page( function() {// call page
       //_module(_argument)
@@ -180,6 +184,16 @@ require = (name,callback) => {
 
 
     });
+    if(config.debug){
+      for(let item in debugLog){
+        if(debugLog[item].msg){
+          console.log(`${debugLog[item].fn} : ${debugLog[item].msg}`);
+        }else{
+          console.log(debugLog[item].fn);
+        }
+
+      }
+    }
   },
 
 //..............................................................................
@@ -187,7 +201,7 @@ require = (name,callback) => {
   page = ( callback ) => {
     // displays page from template, execute callback and call render
     // view.main doesn't exist before first render
-    if(config.debug) console.log(`application.page`);
+    debug(`application.page : ${endpoint()}`);
     $(config.main).fadeOut(400,() => { // page transition out
       template( () => { // load template file
         if(callback) callback(); // callback (module)
@@ -218,7 +232,7 @@ require = (name,callback) => {
     if(!templates[_template]){ // template is not available in templates object
       if(!config.templatePath) config.templatePath = defaults.templatePath; // get filepath
       const templatePath = config.templatePath.replace('{template}',_template);
-      if(config.debug) console.log(`application.template : ${_route}`);
+      debug(`application.template : ${_route}`);
       $.get( `html/templates/${_template}.html`, function( data ) { // get file
         templates[_template] = data; // add to templates object
         if(html) $(config.main).html(data); // view.main doesn't exist after first render
@@ -256,10 +270,10 @@ require = (name,callback) => {
       title(_route); // set document title
       elements(); // set elements
       if(config.nav) nav(); // set navigation
-      for(let property in applicationObject[_route]){
-        if(typeof applicationObject[_route][property] === 'string' ){
+      for(let property in object[_route]){
+        if(typeof object[_route][property] === 'string' ){
           // set values of properties of elements with corresponding class names
-          $(`#${_template} .${property}`).html(str(applicationObject[_route][property])); // element html & parse with str
+          $(`#${_template} .${property}`).html(str(object[_route][property])); // element html & parse with str
         }
       }
       //output = $(`#${template(_route)}`).html(str($(`#${template(_route)}`).html())); // parse with str
@@ -270,7 +284,7 @@ require = (name,callback) => {
       previous = application.object
       if(callback) callback();
       for(let event in events) events[event]()
-      if(config.debug) console.log(`application.render : ${_route}`);
+      debug(`application.render : ${_route} complete`);
     //}
     return application
   },
@@ -289,17 +303,17 @@ require = (name,callback) => {
 
         let menuItem = $('<li></li>').attr('id',item)
           .html(`<a href="${prefix}${item}">
-                  ${str(applicationObject[ item ].name)}
+                  ${str(object[ item ].name)}
                 </a>`);
         view.nav.append(menuItem);
 
 
     }
-    if(config.debug) console.log(`application.nav : ${modules().join(',')}`);
+    debug(`application.nav : ${modules().join(',')}`);
 
     const active = `${config.nav} li#${endpoint()} a`;
     $( active ).addClass('active');
-    if(config.style && applicationObject[endpoint()].color ) {
+    if(config.style && object[endpoint()].color ) {
       $( active ).attr('style',`${str(config.style)}`);
     }
     return view.nav;
@@ -310,10 +324,10 @@ require = (name,callback) => {
   title = (route) => {
     // sets document title with name property
     if(!route) route = endpoint();
-    if(config.debug) console.log(`application.title : ${route}`);
+    debug(`application.title : ${route}`);
     let pageTitle = ( route === '') ?
     config.name
-    : `${applicationObject[route].name} - ${config.name}`;
+    : `${object[route].name} - ${config.name}`;
     $('title').html(pageTitle);
     return pageTitle;
   },
@@ -329,13 +343,13 @@ require = (name,callback) => {
     if(typeof callback === 'string'){
       let property = callback;
       let target = property.includes('.') ?
-      applicationObject[property.split('.')[0]]
+      object[property.split('.')[0]]
         [property.split('.')[1]]
       : module()[property];
       _element.val(target);
       callback = (event) => {
         property.includes('.') ?
-        applicationObject[property.split('.')[0]]
+        object[property.split('.')[0]]
           [property.split('.')[1]] = event.target.value
         : module()[property] = event.target.value;
       }
@@ -373,13 +387,13 @@ require = (name,callback) => {
     //} else {
       _modules = [];
       for(let property of Object.getOwnPropertyNames(application.object)){
-        let obj = applicationObject[property];
+        let obj = object[property];
         if(typeof obj.default === 'function' ) _modules.push(property)
       }
     //}
     return _modules;
   },
-  module = () => applicationObject[route()],
+  module = () => object[route()],
 
 
 //..............................................................................
@@ -407,7 +421,7 @@ require = (name,callback) => {
   return {
     route : route,
     endpoint : endpoint,
-    object : applicationObject,
+    object : object,
     model : model,
     modules : modules,
     module : module,
@@ -426,7 +440,8 @@ require = (name,callback) => {
     view : view,
     template : template,
     templates : templates,
-    title : title
+    title : title,
+    debug : debugLog
   }
 })();
 const ac = application;
