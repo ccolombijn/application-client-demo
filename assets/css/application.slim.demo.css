@@ -46,6 +46,9 @@ header span.inner{ display: none; }
 main section{
   padding: 35px;
 }
+.card{
+  margin-bottom: 30px;
+}
 
 .Inconsolata{
     font-family: 'Inconsolata', monospace;

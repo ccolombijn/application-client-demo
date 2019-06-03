@@ -135,7 +135,20 @@ const try_it_out = (function(){
 
       }
 
+      const expandCard = function(){
+        const editor = $('.editor')
+        const btn = $('.expand i')
+        if(editor.hasClass('col-md-6')){
+          editor.removeClass('col-md-6').addClass('col-md-12')
+          btn.removeClass('fa-angle-double-right').addClass('fa-angle-double-left')
+        }else{
+          editor.removeClass('col-md-12').addClass('col-md-6')
+          btn.removeClass('fa-angle-double-left').addClass('fa-angle-double-right')
+        }
 
+      }
+
+      const expandBtn = $('button.expand').on('click',expandCard)
     },
     template : 'try_it_out',
     color : 'Chocolate'

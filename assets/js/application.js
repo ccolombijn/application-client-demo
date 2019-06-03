@@ -28,14 +28,17 @@ const application = (function(){
   const debug = (fn,msg) => {
     if(!msg){
       if(typeof fn === 'string'){
-        fn = fn.split(' : ')[0]
-        msg = fn.split(' : ')[1]
-      }else if (typeof fn === 'object') {
+        console.log(fn)
+        //fn = fn.split(' : ')[0]
+        //msg = fn.split(' : ')[1]
 
+      }else if (typeof fn === 'object') {
+        console.log(fn)
       }
 
     }
-    debugLog.push({fn : fn,msg : msg})
+    //debugLog.push({fn : fn,msg : msg})
+    debugLog.push(fn)
   }, debugLog = [],
   element = {},
   elements = () => {
@@ -187,9 +190,9 @@ require = (name,callback) => {
     if(config.debug){
       for(let item in debugLog){
         if(debugLog[item].msg){
-          console.log(`${debugLog[item].fn} : ${debugLog[item].msg}`);
+          //console.log(`${debugLog[item].fn} : ${debugLog[item].msg}`);
         }else{
-          console.log(debugLog[item].fn);
+          //console.log(debugLog[item].fn);
         }
 
       }
@@ -365,12 +368,15 @@ require = (name,callback) => {
         }
       }
     }
-    let id = _element.attr('id');
+    let id
+    if(_element){
+      id = _element.attr('id');
 
-    _element.on(_event,(event) => {
-      callback(event);
-      render(); // event render
-    });
+      _element.on(_event,(event) => {
+        callback(event);
+        render(); // event render
+      });
+    }
 
     let _events = id ?  events[id] : events
     return _events
