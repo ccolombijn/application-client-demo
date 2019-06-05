@@ -37,7 +37,16 @@ application.debugger = (callback) => {
       $('#log').append($(`<div>${item}</div>`))
     }
     $('#properties table tbody').html('')
-    for(let item in application.object[application.endpoint()])if(item!='default')$('#properties table tbody').append(`<tr><td><code>${item}</code></td><td>${application.object[application.endpoint()][item]}</td></tr>`)
+    for(let item in application.object[application.endpoint()]){
+      if(item!='default'){
+        if(item === 'color'){
+          $('#properties table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata" style="background:${application.object[application.endpoint()][item]};color:#fff;">${application.object[application.endpoint()][item]}</td></tr>`)
+        }else{
+          $('#properties table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${application.object[application.endpoint()][item]}</td></tr>`)
+        }
+
+      }
+    }
     for(let item in application.object.config)$('#config table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${application.object.config[item]}</td></tr>`)
 
 

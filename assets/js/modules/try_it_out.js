@@ -78,13 +78,24 @@ const try_it_out = (function(){
 
       const executeCode = function(){
 
-
+        const code = editorJs.getValue()
         try{
-          let executeOutput = eval(editorJs.getValue());
-          if(application.object.config.debug)application.debugger()
-          application.render('executeCode');
-          obj.htmlinput = $('div.output').html()
-          editorHtml.setValue(obj.htmlinput)
+          let _require = code.includes('application.require')
+          let executeOutput = eval(code);
+          if(_require){
+            setTimeout(()=>{
+              if(application.object.config.debug)application.debugger()
+              application.render('executeCode');
+              obj.htmlinput = $('div.output').html()
+              editorHtml.setValue(obj.htmlinput)
+            },100)
+          }else{
+            if(application.object.config.debug)application.debugger()
+            application.render('executeCode');
+            obj.htmlinput = $('div.output').html()
+            editorHtml.setValue(obj.htmlinput)
+          }
+
 
           if(typeof executeOutput === 'object') executeOutput = JSON.stringify(executeOutput)
           if(typeof executeOutput === 'array') executeOutput = `[${executeOutput.join(',')}]`
@@ -158,6 +169,6 @@ const try_it_out = (function(){
       if(application.object.config.debug)$('button.debugger').hide()
     },
     template : 'try_it_out',
-    color : 'Chocolate'
+    color : 'SandyBrown'
   })
 })()
