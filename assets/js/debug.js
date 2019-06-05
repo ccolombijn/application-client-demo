@@ -1,10 +1,11 @@
 const debugLog = []
 application.debugLog = debugLog
 application.debugger = (callback) => {
-  if($('#debugger'))$('#debugger').remove()
+// TODO: cache debugger html in one ajax call... on each init is too expensive
   $.get('html/debug/debugger.html',(_debugger,callback)=>{
+    if($('#debugger'))$('#debugger').remove()
     _debugger = $(_debugger)
-
+    // TODO: refinement, refinement, refinement...
 
     $(`${application.object.config.main} #${application.template()}`).append(_debugger)
     //application.render()
@@ -30,6 +31,8 @@ application.debugger = (callback) => {
       if(item.includes(' ms')){
         let loadtime = (item.split('in ')[1].split(' ms')[0])
         item = item.replace(`${loadtime} ms`,`<span style="color:${loadTimeColor(loadtime/1)}">${loadtime} ms</span>`)
+      }else if (item.includes('Error')) {
+        item = `<span class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${item}</span>`
       }
       //item = item.replace('load','<b>load</b>')
       item = item.replace('complete','<i class="fas fa-check"></i><b>complete</b>')
@@ -41,6 +44,10 @@ application.debugger = (callback) => {
       if(item!='default'){
         if(item === 'color'){
           $('#properties table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata" style="background:${application.object[application.endpoint()][item]};color:#fff;">${application.object[application.endpoint()][item]}</td></tr>`)
+        }else if (item === 'loadtime') {
+          $('#properties table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata" style="color:${loadTimeColor(application.object[application.endpoint()][item]/1)}">${application.object[application.endpoint()][item]} ms</td></tr>`)
+
+
         }else{
           $('#properties table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${application.object[application.endpoint()][item]}</td></tr>`)
         }

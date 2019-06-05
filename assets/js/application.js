@@ -237,7 +237,7 @@ const application = (function(){
         debug(`application.page : ${config.main} #${template()}`);
         if(callback) callback(); // callback (module)
 
-        if(config.debug) application.debugger()
+
           render('page'); // render document
         view.main.fadeIn(); // page transition in
 
@@ -344,6 +344,7 @@ const application = (function(){
       _loadtime =  _finish - _start
       thisObj.loadtime = _loadtime
       debug(`application.render ${_event}: ${_route} complete in ${_loadtime} ms`);
+      if(config.debug) application.debugger()
     //}
     return application;
   },

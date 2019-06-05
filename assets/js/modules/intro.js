@@ -10,7 +10,7 @@ const intro = (function(){
     content : 'This is content for intro!',
     color : 'SkyBlue',
     test : {
-      name : 'Intro',
+      name : 'Test',
       default : () => console.log('This is test!')
     }
   })

@@ -103,6 +103,10 @@ const try_it_out = (function(){
           if(!executeOutput) executeOutput = '// Output undefined'
           $('#output code').html(executeOutput)
         }catch(error){
+          if(application.object.config.debug){
+            debug('executeCode : '+error)
+            application.debugger()
+          }
           $('#output code').html(error)
         }
       }

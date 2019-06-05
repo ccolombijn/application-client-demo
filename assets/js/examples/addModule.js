@@ -7,7 +7,7 @@ application.controller('#addModuleBtn','click',()=>{
     const content = $('#contentInput').val();
     const color = $('#colorInput').val();
     application.add(name,{
-      name : name,
+      name : title,
       default : ()=>{
         console.log(consoleMsg);
       },
@@ -15,4 +15,3 @@ application.controller('#addModuleBtn','click',()=>{
       color : color
     });
   });
-// application.add('test',{name:'Test',content : 'Dit is content',default:()=>console.log('test')})
