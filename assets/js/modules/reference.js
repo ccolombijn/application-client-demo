@@ -7,7 +7,7 @@ const reference = (function(){
   const objs = {
     'application' : application,
     'application.object' : application.object,
-    'utils' : utils,
+    //'utils' : utils,
     'jQuery' : jQuery,
     'Backbone' : Backbone,
     'document' : document

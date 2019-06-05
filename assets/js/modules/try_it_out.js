@@ -9,7 +9,7 @@ const try_it_out = (function(){
     'utils' : utils
   },
 
-  examples = [ 'updateHeader','addModule','apiRequest','requireModule']
+  examples = [ 'updateHeader','addModule','apiRequest','requireScript','requireModule']
   let sync
   application.add('try_it_out',{
     name : 'Try it out',
@@ -77,11 +77,12 @@ const try_it_out = (function(){
 
 
       const executeCode = function(){
-        console.log('executeCode')
+
+
         try{
           let executeOutput = eval(editorJs.getValue());
-
-          application.render();
+          if(application.object.config.debug)application.debugger()
+          application.render('executeCode');
           obj.htmlinput = $('div.output').html()
           editorHtml.setValue(obj.htmlinput)
 
@@ -149,6 +150,12 @@ const try_it_out = (function(){
       }
 
       const expandBtn = $('button.expand').on('click',expandCard)
+      const debugBtn = $('button.debugger').on('click',function(){
+        application.object.config.debug = true;
+        application.debugger()
+        $('button.debugger').hide()
+      })
+      if(application.object.config.debug)$('button.debugger').hide()
     },
     template : 'try_it_out',
     color : 'Chocolate'

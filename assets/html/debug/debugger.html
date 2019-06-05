@@ -1,0 +1,78 @@
+<div id="debugger" style="margin-top:25px;">
+  <div class="card shadow">
+<div class="card-header">
+  <span class="navbar-brand"><i class="fas fa-bug"></i> Debugger</span>
+  <div class="float-right"><button type="button" class="btn btn-light modalswitch"><i class="far fa-window-maximize"></i></button><button type="button" class="btn btn-light debugswitch"><i class="fas fa-power-off"></i></button></div>
+</div>
+<div class="card-body">
+
+  <ul class="nav nav-tabs" id="debuggerTab" role="tablist">
+    <li class="nav-item">
+      <a class="nav-link active" id="properties-tab" data-toggle="tab" href="#properties" role="tab" aria-controls="properties" aria-selected="true">Module</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="debugLog-tab" data-toggle="tab" href="#debugLog" role="tab" aria-controls="debugLog" aria-selected="false">Log</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="config-tab" data-toggle="tab" href="#config" role="tab" aria-controls="config" aria-selected="false">Config</a>
+    </li>
+  </ul>
+  <div class="tab-content" id="debuggerContent">
+    <div class="tab-pane fade show active" id="properties" role="tabpanel" aria-labelledby="properties-tab">
+
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" style="margin-top:25px;">
+                  <h5>Module Properties</h5>
+                  <div class="btn-toolbar mb-2 mb-md-0">
+
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                  Add
+                    </button>
+                  </div>
+                </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Property</th><th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+
+    </div>
+    <div class="tab-pane fade" id="debugLog" role="tabpanel" aria-labelledby="debugLog-tab">
+      <div id="log" class="Inconsolata text-black-50 pre-scrollable" style="background: #F7F7F7;padding: 25px; border:1px solid #eee;">
+
+      </div>
+    </div>
+    <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Property</th><th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+
+
+
+  <div class="stats text-muted" style="margin-bottom: 15px;">
+
+  </div>
+
+
+</div>
+
+</div>
+
+
+
+</div>

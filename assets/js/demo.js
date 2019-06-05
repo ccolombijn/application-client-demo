@@ -3,7 +3,9 @@
 */
 'use strict'
 const demo = (function(){
-
+  application.requireCallback = ()=>{
+    //console.log('is fired when required from config.json')
+  }
   const codemirror = (mode) => {
     const editor = CodeMirror.fromTextArea(
       document.querySelector(`textarea.${mode}`),

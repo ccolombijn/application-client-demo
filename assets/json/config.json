@@ -1,5 +1,9 @@
 {
   "name" : "Application Client Demo",
+  "require" : [
+    "utils",
+    "demo"
+  ],
   "modules" : [
     "intro",
     "reference",
