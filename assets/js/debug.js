@@ -85,6 +85,7 @@ application.debugger = (callback) => {
     })
   })
 }
+let init
 const debug = (fn,msg) => {
     let filter
     /*if(typeof config.debug === 'string'
@@ -97,22 +98,39 @@ const debug = (fn,msg) => {
       filter = utils.compare(config.debug,modules())
 
     }*/
+    const log = (fn) =>{
 
-    if(!msg){
-      if(typeof fn === 'string'){
-        if(application.object.config.debug)console.log(fn)
+      if(!init){
+        init = true;
+        console.info('Debugger is enabled with debug property of assets/json/config.json')
+      }
+      console.log(fn)
+      debugLog.push(fn)
+    }
+    const configVal = application.object.config.debug
+    const logFilter = (fn)=>{
+      if (typeof configVal === 'string') {
+        if(fn.includes(configVal)) log(fn)
+
+      }else if (configVal.length > 0) {
+        for(let val in configVal){
+          if(fn.includes(val)) log(fn)
+        }
+      }
+    }
+
+    configVal === true ? log(fn) : logFilter(fn)
+
+
+
         //fn = fn.split(' : ')[0]
         //msg = fn.split(' : ')[1]
 
-      }else if (typeof fn === 'object') {
-        console.log(fn)
-      }
 
-    }
+
+
     //debugLog.push({fn : fn,msg : msg})
-    debugLog.push(fn)
 
 
 
-
-  }
+}

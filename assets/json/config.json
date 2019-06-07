@@ -9,6 +9,12 @@
     "reference",
     "try_it_out"
   ],
+  "routes" : {
+    "intro" : "intro",
+    "reference" : "reference",
+    "try_it_out" : "try_it_out",
+    "test" : "try_it_out"
+  },
   "default" : "intro",
   "defaults" : {
     "template" : "pageLayout",
