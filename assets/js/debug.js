@@ -59,7 +59,7 @@ const getCDNs = () => {
       if(libRef[script.split('.')[0].split('-')[0]]){
         const libRefItem = libRef[script.split('.')[0].split('-')[0]]
         let libItem = '<div class="card shadow" style="width:100%; margin:15px;"><div class="row no-gutters"><div class="col-md-2">'
-        libItem += `<img src="img/logos/${script.split('.')[0].split('-')[0]}.png" style="width:50px;margin:25px;" class="card-img" >`
+        libItem += `<img src="img/logos/${script.split('.')[0].split('-')[0]}.png" style="width:50px;margin-top:10px;margin-left:10px;" class="card-img" >`
         libItem += ' </div><div class="col-md-10"><div class="card-body">'
         libItem += `<h5 class="card-title">${libRefItem.name}</h5><p class="card-text"><small class="text-muted">Hosted on <span class="Inconsolata">${cdn}</span></small></p>`
         libItem += ' </div></div></div></div>'
