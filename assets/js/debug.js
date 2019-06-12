@@ -46,7 +46,25 @@ const getCDNs = () => {
         src : src,
         cdn : cdn,
         integrity : integrity,
-        package : script
+        package : script,
+        type : 'JavaScript'
+      });
+    }
+  });
+  $('link').each(function(){
+    const href = $(this).attr('href');
+    if(href.includes('https')) {
+      const element = $(this);
+      const hrefArr = href.replace('https://','').split('/');
+      const integrity = element.attr('integrity');
+      const cdn = hrefArr[0];
+      const stylesheet = hrefArr[hrefArr.length-1];
+      CDNs.push({
+        src : href,
+        cdn : cdn,
+        integrity : integrity,
+        package : stylesheet,
+        type : 'CSS'
       });
     }
   });
@@ -86,7 +104,7 @@ application.debugger = (callback) => {
     if(CDNs.length===0)getCDNs()
     let cdnsHtml = ''
     for(let item of CDNs){
-      if(item) cdnsHtml += `<tr><td><code>${item.package}</code></td><td class="Inconsolata">${item.cdn}</td></tr>`
+      if(item) cdnsHtml += `<tr><td><code>${item.package}</code></td><td>${item.type}</td><td class="Inconsolata">${item.cdn}</td></tr>`
     }
     $('.cdnsCount').html(CDNs.length)
 
@@ -101,6 +119,7 @@ application.debugger = (callback) => {
 
     $('.stats').html(`<small><i class="fas fa-history"></i> Init load time : <span style="color:${loadTimeColor(application.loadtime)}">${application.loadtime} ms</span>; Module <b>${module.name}</b> render in<span style="color:${loadTimeColor(module.loadtime)}"> ${module.loadtime} ms</span> on navigator.userAgent:${navigator.userAgent}</small>`)
     const logElement = $('#log')
+    let line = 0;
     for(let item of debugLog){
       if(item.includes(' ms')){
         let loadtime = (item.split('in ')[1].split(' ms')[0])
@@ -110,8 +129,8 @@ application.debugger = (callback) => {
       }
       //item = item.replace('load','<b>load</b>')
       item = item.replace('complete','<i class="fas fa-check"></i><b>complete</b>')
-
-      logElement.append($(`<div>${item}</div>`))
+      line++
+      logElement.append($(`<div><span class="font-weight-lighter">${line}.</span> ${item}</div>`))
     }
 
 
@@ -168,25 +187,36 @@ application.debugger = (callback) => {
     let editor = ace.edit("code");
     editor.setTheme("ace/theme/github");
     editor.session.setMode("ace/mode/javascript");
-    
+
     $('#jshint #functions').html(``);
     if(jshintModuleOutput.functions) {
 
-      $('#jshint #functionsCol h5').html(`${jshintModuleOutput.functions.length} functions`);
+      $('#jshint .functionsHeader').html(`${jshintModuleOutput.functions.length} functions`);
       $('#jshint #info').html('<i class="fas fa-info"></i>').append(`${jshintModuleOutput.functions.length} functions (${jshintModuleOutput.functions.filter(item=>item.name === '(empty)').length} anonymous); `)
       for(let item of jshintModuleOutput.functions){
-        let functionItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> ${item.name} (${item.line}:${item.character})</li>`).on('click',function(){
-          editor.moveCursorTo(item.line-1,item.character,false);
-          $('#jshint #functions li').removeClass('active')
-          $(this).addClass('active')
-          //editor.selectLineStart()
-        })
+        let functionItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> ${item.name} (${item.line}:${item.character})</li>`)
+          .on('click',function(){
+            editor.moveCursorTo(item.line-1,item.character,false);
+            $('#jshint #functions li').removeClass('active')
+            $(this).addClass('active')
+            //editor.selectLineStart()
+          })
         $('#jshint #functions').append(functionItem )
       }
     }
+    $('#jshint #implieds').html('')
+    if(jshintModuleOutput.implieds) {
+      $('#jshint #info').append(`${jshintModuleOutput.implieds.length} implieds; `)
+      $('#jshint .impliedsHeader').html(`${jshintModuleOutput.implieds.length} implieds`);
+      for(let item of jshintModuleOutput.implieds){
+        let impliedItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> <code>${item.name}</code> (${item.line})</li>`)
+        $('#jshint #implieds').append(impliedItem )
+      }
+    }
+    console.log(jshintModuleOutput)
 
-    if(jshintModuleOutput.implieds) $('#jshint #info').append(`${jshintModuleOutput.implieds.length} implieds; `)
     if(jshintModuleOutput.globals) $('#jshint #info').append(`${jshintModuleOutput.globals.length} globals; `)
+    if(jshintModuleOutput.member) $('#jshint #info').append(`${jshintModuleOutput.member.length} member; `)
     let modal
     application.controller($('.modalswitch'),'click',function(){
 
