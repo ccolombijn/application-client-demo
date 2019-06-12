@@ -29,6 +29,20 @@ const loadTimeColor = (time) => {
   return color
 }
 const CDNs = []
+const libRef = {
+  jquery : { name : 'jQuery' },
+  bootstrap : { name : 'Bootstrap' },
+  popper : { name : 'Popper.js' },
+  underscore : { name : 'Underscore.js' },
+  backbone : { name : 'Backbone.js' },
+  react : { name : 'React' },
+  vue : { name : 'Vue' },
+  angular : { name : 'Angular' },
+  ace : { name : 'Ace Editor' },
+  showdown : { name : 'Showdown' },
+  codemirror : { name : 'CodeMirror'},
+  jshint : { name : 'JSHint'}
+}
 const getCDNs = () => {
   $('script').each(function(){
     const src = $(this).attr('src');
@@ -42,6 +56,15 @@ const getCDNs = () => {
       const integrity = element.attr('integrity')
       const cdn = srcArr[0]
       const script = srcArr[srcArr.length-1]
+      if(libRef[script.split('.')[0].split('-')[0]]){
+        const libRefItem = libRef[script.split('.')[0].split('-')[0]]
+        let libItem = '<div class="card shadow" style="width:100%; margin:15px;"><div class="row no-gutters"><div class="col-md-2">'
+        libItem += `<img src="img/logos/${script.split('.')[0].split('-')[0]}.png" style="width:50px;margin:25px;" class="card-img" >`
+        libItem += ' </div><div class="col-md-10"><div class="card-body">'
+        libItem += `<h5 class="card-title">${libRefItem.name}</h5><p class="card-text"><small class="text-muted">Hosted on <span class="Inconsolata">${cdn}</span></small></p>`
+        libItem += ' </div></div></div></div>'
+        $('#libraries').append(libItem)
+      }
       CDNs.push({
         src : src,
         cdn : cdn,
@@ -94,7 +117,27 @@ const jshint = (source) => {
   //$('#ecmascriptVersion').val(JSHINT.data().options.)
   return JSHINT.data();
 }
-application.debugLog = debugLog
+let editor,editorElement
+const aceEditor = function(args){
+  //setTimeout(()=>{
+    if(editor) {
+      editor.destroy()
+      editor.container.remove()
+      $('#editorCol').append(editorElement)
+    }else{
+      editorElement = $('#code')
+    }
+    editor = ace.edit(args.id);
+    editor.setTheme(args.theme);
+    editor.session.setMode(`ace/mode/${args.mode}`);
+  //},500)
+
+}
+const setCode = function(callback){
+  $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.object[application.endpoint()[0]].default.toString()}</pre>`);
+  if(callback) callback();
+}
+application.debugLog = debugLog;
 application.debugger = (callback) => {
 
 // TODO: cache debugger html in one ajax call... on each init is too expensive
@@ -106,9 +149,8 @@ application.debugger = (callback) => {
     for(let item of CDNs){
       if(item) cdnsHtml += `<tr><td><code>${item.package}</code></td><td>${item.type}</td><td class="Inconsolata">${item.cdn}</td></tr>`
     }
-    $('.cdnsCount').html(CDNs.length)
-
-    $('#cdns_ table tbody').html(cdnsHtml)
+    $('.cdnsCount').html(CDNs.length);
+    $('#cdns_ table tbody').html(cdnsHtml);
 
 
     //application.render()
@@ -117,7 +159,7 @@ application.debugger = (callback) => {
         applicationLoadTimeColor,
         moduleLoadTimeColor;
 
-    $('.stats').html(`<small><i class="fas fa-history"></i> Init load time : <span style="color:${loadTimeColor(application.loadtime)}">${application.loadtime} ms</span>; Module <b>${module.name}</b> render in<span style="color:${loadTimeColor(module.loadtime)}"> ${module.loadtime} ms</span> on navigator.userAgent:${navigator.userAgent}</small>`)
+    $('.stats').html(`<small><i class="fas fa-history"></i> Init load time : <span style="color:${loadTimeColor(application.loadtime)}">${application.loadtime} ms</span>; Module <b>${module.name}</b> rendered in<span style="color:${loadTimeColor(module.loadtime)}"> ${module.loadtime} ms</span> with navigator.userAgent : <span class="Inconsolata">${navigator.userAgent}</span></small>`)
     const logElement = $('#log')
     let line = 0;
     for(let item of debugLog){
@@ -158,15 +200,34 @@ application.debugger = (callback) => {
       }
     }
     $('.moduleCount').html(Object.getOwnPropertyNames(application.module()).length)
-    for(let item in application.object.config)$('#config table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${application.object.config[item]}</td></tr>`)
+    for(let item in application.object.config){
+      /*if( typeof application.object.config[item] === 'object'){
+        let configObjectTable = '<table class="table"><tbody>'
+        for(let property in application.object.config[item]){
+          configObjectTable += `<tr><td><code>${property}</code></td><td class="Inconsolata">${application.object.config[item][property]}</td></tr>`
+        }
+        configObjectTable += '</tbody></table>'
+        $('#config table tbody').append(`<tr><td><code>${item}</code></td><td>${configObjectTable}</td></tr>`)
+      }else{*/
+      if( typeof application.object.config[item] === 'object'){
+        $('#config table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${Object.getOwnPropertyNames(application.object.config[item]).join(',')}</td></tr>`)
+      }else{
+        $('#config table tbody').append(`<tr><td><code>${item}</code></td><td class="Inconsolata">${application.object.config[item]}</td></tr>`)
+
+      }
+      //}
+
+    }
     $('.configCount').html(Object.getOwnPropertyNames(application.object.config).length)
 
 
     const jshintModuleOutput = jshint(`application.object.${application.endpoint()}.default = ${application.object[application.endpoint()].default.toString()}`)
     const ECMAScriptVersion = jshintModuleOutput.options.esversion;
-    const asi = jshintModuleOutput.options.asi;
-    const undef = jshintModuleOutput.options.undef;
-    $('#jshint #details').html(`ECMAScript version ${ECMAScriptVersion}; undef : ${undef}; asi(semicolons) : ${asi}`);
+
+    const undef = jshintModuleOutput.options.undef ? ' not' : '';
+    const asi = jshintModuleOutput.options.asi ? ' not' : ''
+
+    $('#jshint #details').html(`ECMAScript ${ECMAScriptVersion}; Undefined variables${undef}  permitted, Semicolons(;)${asi} required`);
     $('#jshint #errors,jshint #code').html('');
     if(jshintModuleOutput.errors){
       $('#jshint #errors').append(`<h5 class="text-danger"><i class="fas fa-times"></i> Module <span class="Inconsolata">assets/js/modules/${application.endpoint()}.js</span> has ${jshintModuleOutput.errors.length} Errors;</h5>`)
@@ -183,10 +244,18 @@ application.debugger = (callback) => {
       $('#jshint #errors').append(`<div class="text-danger Inconsolata"><i class="fas fa-exclamation-triangle"></i> <a href="http://linterrors.com/js?q=${jshintModuleOutput.errors[err].code}" target="_blank">${jshintModuleOutput.errors[err].code}</a> : <code>${jshintModuleOutput.errors[err].evidence}</code> on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}</div>`);
       console.error(`JSHint ${jshintModuleOutput.errors[err].code} : ${jshintModuleOutput.errors[err].evidence} on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}`);
     }
-    $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.object[application.endpoint()[0]].default.toString()}</pre>`)
-    let editor = ace.edit("code");
-    editor.setTheme("ace/theme/github");
-    editor.session.setMode("ace/mode/javascript");
+    setCode(()=> aceEditor({
+      id: 'code',
+      mode : 'javascript',
+      theme : 'ace/theme/github'
+    }));
+    $('#editorTheme').on('change',function(event){
+      setCode(()=> aceEditor({
+        id: 'code',
+        mode : 'javascript',
+        theme : $('#editorTheme').val()
+      }));
+    })
 
     $('#jshint #functions').html(``);
     if(jshintModuleOutput.functions) {
@@ -216,7 +285,7 @@ application.debugger = (callback) => {
     console.log(jshintModuleOutput)
 
     if(jshintModuleOutput.globals) $('#jshint #info').append(`${jshintModuleOutput.globals.length} globals; `)
-    if(jshintModuleOutput.member) $('#jshint #info').append(`${jshintModuleOutput.member.length} member; `)
+    //if(jshintModuleOutput.member) $('#jshint #info').append(`${jshintModuleOutput.member.length} member; `)
     let modal
     application.controller($('.modalswitch'),'click',function(){
 
