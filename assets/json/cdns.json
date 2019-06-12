@@ -1,0 +1,14 @@
+{
+  "jquery" : { "name" : "jQuery", "docs" : "https://devdocs.io/jquery/" },
+  "bootstrap" : { "name" : "Bootstrap" },
+  "popper" : { "name" : "Popper.js"},
+  "undercore" : { "name" : "Undercore.js"},
+  "backbone" : { "name" : "Backbone.js"},
+  "react" : { "name" : "React"},
+  "vue" : { "name" : "Vue"},
+  "angular" : { "name" : "Angular"},
+  "ace" : { "name" : "Ace Editor"},
+  "showdown" : { "name" : "Showdown"},
+  "codemirror" : { "name" : "Codemirror"},
+  "jshint" : { "name" : "JSHint"}
+}

@@ -32,7 +32,7 @@ const CDNs = []
 const libRef = {
   jquery : { name : 'jQuery', docs : 'https://devdocs.io/jquery/' },
   bootstrap : { name : 'Bootstrap', docs : 'https://devdocs.io/bootstrap/' },
-  popper : { name : 'Popper.js', docs : 'https://popper.js.org/popper-documentation.html' },
+  popper : { name : 'Popper.js', docs : 'https://devdocs.io/bootstrap/' },
   underscore : { name : 'Underscore.js', docs : 'https://devdocs.io/underscore/' },
   backbone : { name : 'Backbone.js', docs : 'https://devdocs.io/backbone/' },
   react : { name : 'React', docs : 'https://devdocs.io/react/' },
@@ -134,7 +134,8 @@ const aceEditor = function(args){
 
 }
 const setCode = function(callback){
-  $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.object[application.endpoint()[0]].default.toString()}</pre>`);
+  console.log(application.module())
+  $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.module().default.toString()}</pre>`);
   if(callback) callback();
 }
 application.debugLog = debugLog;
