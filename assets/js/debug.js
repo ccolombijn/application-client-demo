@@ -30,18 +30,18 @@ const loadTimeColor = (time) => {
 }
 const CDNs = []
 const libRef = {
-  jquery : { name : 'jQuery' },
-  bootstrap : { name : 'Bootstrap' },
-  popper : { name : 'Popper.js' },
-  underscore : { name : 'Underscore.js' },
-  backbone : { name : 'Backbone.js' },
-  react : { name : 'React' },
-  vue : { name : 'Vue' },
-  angular : { name : 'Angular' },
-  ace : { name : 'Ace Editor' },
-  showdown : { name : 'Showdown' },
-  codemirror : { name : 'CodeMirror'},
-  jshint : { name : 'JSHint'}
+  jquery : { name : 'jQuery', docs : 'https://devdocs.io/jquery/' },
+  bootstrap : { name : 'Bootstrap', docs : 'https://devdocs.io/bootstrap/' },
+  popper : { name : 'Popper.js', docs : 'https://popper.js.org/popper-documentation.html' },
+  underscore : { name : 'Underscore.js', docs : 'https://devdocs.io/underscore/' },
+  backbone : { name : 'Backbone.js', docs : 'https://devdocs.io/backbone/' },
+  react : { name : 'React', docs : 'https://devdocs.io/react/' },
+  vue : { name : 'Vue', docs : 'https://devdocs.io/vue/' },
+  angular : { name : 'Angular', docs : 'https://devdocs.io/angular/' },
+  ace : { name : 'Ace Editor', docs : 'https://ace.c9.io/#nav=api' },
+  showdown : { name : 'Showdown', docs : 'https://github.com/showdownjs/showdown/wiki' },
+  codemirror : { name : 'CodeMirror', docs : 'https://codemirror.net/doc/manual.html'},
+  jshint : { name : 'JSHint', docs : 'https://jshint.com/docs/'}
 }
 const getCDNs = () => {
   $('script').each(function(){
@@ -58,11 +58,11 @@ const getCDNs = () => {
       const script = srcArr[srcArr.length-1]
       if(libRef[script.split('.')[0].split('-')[0]]){
         const libRefItem = libRef[script.split('.')[0].split('-')[0]]
-        let libItem = '<div class="card shadow" style="width:100%; margin:15px;"><div class="row no-gutters"><div class="col-md-2">'
-        libItem += `<img src="img/logos/${script.split('.')[0].split('-')[0]}.png" style="width:50px;margin-top:10px;margin-left:10px;" class="card-img" >`
+        let libItem = '<div class="card shadow" style="width:100%; margin:15px;background: linear-gradient(135deg, #fdffff 0%,#f7f7f7 100%); "><div class="row no-gutters"><div class="col-md-2">'
+        libItem += `<img src="img/logos/${script.split('.')[0].split('-')[0]}.png" style="width:50px;margin-top:20px;margin-left:20px;" class="card-img" >`
         libItem += ' </div><div class="col-md-10"><div class="card-body">'
-        libItem += `<h5 class="card-title">${libRefItem.name}</h5><p class="card-text"><small class="text-muted">Hosted on <span class="Inconsolata">${cdn}</span></small></p>`
-        libItem += ' </div></div></div></div>'
+        libItem += `<h5 class="card-title">${libRefItem.name}</h5><p class="card-text"><small class="text-muted">Hosted on <span class="Inconsolata">${cdn}</span><br></small></p>`
+        libItem += ` </div></div></div><div class="card-footer"><span class="btn-group"><a href="${libRefItem.docs}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-book"></i> Docs</a><a href="https://www.wappalyzer.com/technologies/${script.split('.')[0].split('-')[0]}" class="btn btn-light btn-sm" target="_blank"><i class="fas fa-external-link-alt"></i> Wappalyzer</a><a href="https://www.npmjs.com/package/${script.split('.')[0].split('-')[0]}" class="btn btn-light btn-sm" target="_blank"><i class="fab fa-npm"></i> npm</a></span></div></div>`
         $('#libraries').append(libItem)
       }
       CDNs.push({
@@ -261,7 +261,7 @@ application.debugger = (callback) => {
     if(jshintModuleOutput.functions) {
 
       $('#jshint .functionsHeader').html(`${jshintModuleOutput.functions.length} functions`);
-      $('#jshint #info').html('<i class="fas fa-info"></i>').append(`${jshintModuleOutput.functions.length} functions (${jshintModuleOutput.functions.filter(item=>item.name === '(empty)').length} anonymous); `)
+      $('#jshint #info').html('<i class="fas fa-angle-right"></i>').append(`${jshintModuleOutput.functions.length} functions (${jshintModuleOutput.functions.filter(item=>item.name === '(empty)').length} anonymous); `)
       for(let item of jshintModuleOutput.functions){
         let functionItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> ${item.name} (${item.line}:${item.character})</li>`)
           .on('click',function(){
