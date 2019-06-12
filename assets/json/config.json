@@ -24,6 +24,11 @@
   "nav" : "nav#navMenu",
   "template" : "pageLayout",
   "style" : "border-top: 3px solid {color}",
-  "debug" : true
+  "debug" : true,
+  "jshint" : {
+    "undef" : false,
+    "asi" : false,
+    "esversion" : 5
+  }
 
 }

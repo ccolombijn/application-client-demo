@@ -9,7 +9,7 @@ const demo = (function(){
   const codemirror = (mode) => {
     const editor = CodeMirror.fromTextArea(
       document.querySelector(`textarea.${mode}`),
-      { lineNumbers: false, mode:  mode }
+      { lineNumbers: false, indentUnit : 3,mode:  mode }
     );
 
     return editor

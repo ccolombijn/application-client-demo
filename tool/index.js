@@ -2,10 +2,18 @@
 const fs = require('fs');
 const path = require('path');
 const create = function(name){
+  return {
+    application : () => {
 
+    }
+  }
 }
 const update = function(){
+  return {
+    application : () => {
 
+    }
+  }
 }
 const config = (function(){
   const actions = [

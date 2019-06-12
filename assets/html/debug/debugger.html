@@ -8,13 +8,19 @@
 
   <ul class="nav nav-tabs" id="debuggerTab" role="tablist">
     <li class="nav-item">
-      <a class="nav-link active" id="properties-tab" data-toggle="tab" href="#properties" role="tab" aria-controls="properties" aria-selected="true">Module</a>
+      <a class="nav-link active" id="properties-tab" data-toggle="tab" href="#properties" role="tab" aria-controls="properties" aria-selected="true">Module <span class="badge badge-light moduleCount"></span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" id="debugLog-tab" data-toggle="tab" href="#debugLog" role="tab" aria-controls="debugLog" aria-selected="false">Log</a>
+      <a class="nav-link" id="debugLog-tab" data-toggle="tab" href="#debugLog" role="tab" aria-controls="debugLog" aria-selected="false">Log <span class="badge badge-light logCount"></span></a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" id="config-tab" data-toggle="tab" href="#config" role="tab" aria-controls="config" aria-selected="false">Config</a>
+      <a class="nav-link" id="config-tab" data-toggle="tab" href="#config" role="tab" aria-controls="config" aria-selected="false">Config <span class="badge badge-light configCount"></span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="cdns-tab" data-toggle="tab" href="#cdns_" role="tab" aria-controls="config" aria-selected="false">CDNs <span class="badge badge-light cdnsCount"></span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="jshint-tab" data-toggle="tab" href="#jshint" role="tab" aria-controls="config" aria-selected="false">JSHint <span class="badge badge-danger jshintErrorCount"></span></a>
     </li>
   </ul>
   <div class="tab-content" id="debuggerContent">
@@ -29,7 +35,7 @@
                     </button>
                   </div>
                 </div>
-        <table class="table">
+        <table class="table shadow">
           <thead>
             <tr>
               <th>Property</th><th>Value</th>
@@ -42,12 +48,21 @@
 
     </div>
     <div class="tab-pane fade" id="debugLog" role="tabpanel" aria-labelledby="debugLog-tab">
-      <div id="log" class="Inconsolata text-black-50 pre-scrollable" style="background: #F7F7F7;padding: 25px; border:1px solid #eee;">
+      <div id="log" class="Inconsolata text-black-50 pre-scrollable shadow" style="background: #F7F7F7;padding: 25px; border:1px solid #eee; height:250px;">
 
       </div>
     </div>
     <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="config-tab">
-      <table class="table">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" style="margin-top:25px;">
+                <h5>Config Properties</h5>
+                <div class="btn-toolbar mb-2 mb-md-0">
+
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                Add
+                  </button>
+                </div>
+              </div>
+      <table class="table shadow">
         <thead>
           <tr>
             <th>Property</th><th>Value</th>
@@ -58,8 +73,77 @@
         </tbody>
       </table>
     </div>
-  </div>
+    <div class="tab-pane fade" id="cdns_" role="tabpanel" aria-labelledby="cdns-tab">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" style="margin-top:25px;">
+                <h5>CDNs (Content Delivery Networks)</h5>
+                <div class="btn-toolbar mb-2 mb-md-0">
 
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                Add
+                  </button>
+                </div>
+              </div>
+      <table class="table shadow">
+        <thead>
+          <tr>
+            <th>Script</th><th>CDN</th>
+          </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+      </table>
+    </div>
+    <div class="tab-pane fade" id="jshint" role="tabpanel" aria-labelledby="jshint-tab">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" style="margin-top:25px;">
+                <h5>JSHint Linter <small class="text-muted" id="details"></small></h5>
+                <div class="btn-toolbar mb-2 mb-md-0">
+
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                Add
+                  </button>
+                </div>
+              </div>
+    <!--  <div id="options" style="padding: 25px;">
+        <div class="row">
+          <div class="form-group">
+            <label for="consoleMsg">ECMAScript version</label>
+            <select id="ecmascriptVersion" class="form-control">
+              <option>3</option>
+              <option>5</option>
+              <option>6</option>
+              <option>7</option>
+              <option>8</option>
+              <option>9</option>
+            </select>
+            <small id="consoleMsgHelp" class="form-text text-muted">This option is used to specify the ECMAScript version to which the code
+  must adhere. </small>
+          </div>
+        </div>
+      </div>-->
+      <div id="errors" class="border shadow pre-scrollable" style="background: linear-gradient(to bottom, #ffffff 0%,#f7f7f7 100%);padding: 25px; border:1px solid #eee; max-height:200px;">
+
+      </div>
+      <div class="row">
+        <div class="col-md-4" id="functionsCol">
+          <!--<h5 style="padding:10px;" class="text-muted"></h5>-->
+          <ul id="functions" class="list-group shadow-sm" style="margin:25px">
+
+          </ul>
+        </div>
+        <div class="col-md-8">
+          <div id="code" class="border text-muted shadow" style="padding: 25px; height:100%; font-size:16px;margin:25px;">
+
+          </div>
+        </div>
+      </div>
+
+      <div id="info" class="border shadow Inconsolata text-muted" style="background: #F7F7F7;padding: 15px; ">
+
+      </div>
+    </div>
+  </div>
+<style type="text/css"> li.list-group-item.active{ color: #fff !important; background: linear-gradient(to bottom, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%) !important;}</style>
 
 
 

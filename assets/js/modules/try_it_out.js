@@ -31,7 +31,7 @@ const try_it_out = (function(){
       //if(!sync){
         if(sync) clearInterval(sync)
         sync = setInterval(() => {
-          if(application.endpoint()==='try_it_out'){
+          if(application.endpoint()[0]==='try_it_out'){
             if(editorJs.somethingSelected()) editorSelection()
             if($('div.output').html()!= obj.htmlinput) {
 
@@ -105,6 +105,8 @@ const try_it_out = (function(){
         }catch(error){
           if(application.object.config.debug){
             debug('executeCode : '+error)
+            const executCodejshint = jshint(code);
+
             application.debugger()
           }
           $('#output code').html(error)

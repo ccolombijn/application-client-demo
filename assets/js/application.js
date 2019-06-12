@@ -273,7 +273,7 @@ const application = (function(){
           throw `application.moduleRouter  : ${typeof module} ${module} is not a function`;
         }
 
-        debug(`application.moduleRouter : ${ object.routes[endpoint()]} : ${_endpoint.join('.')}`);
+        debug(`application.moduleRouter : #${ object.routes[endpoint()]} > module:${_endpoint.join('.')}`);
 
       });
     }else{
@@ -576,3 +576,4 @@ const application = (function(){
     debug : []
   }
 })();
+const $a = application;
