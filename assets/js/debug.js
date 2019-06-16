@@ -8,11 +8,21 @@ const debugLog = [];
 let _debugger;
 const debuggerStatic = (callback) => {
   if(_debugger){
+    $(`${application.object.config.main} #${application.template()}`)
+      .append(_debugger);
     callback();
   }else{
-    $.get('html/debug/debugger.html',(response)=>
-      _debugger = $(response)).done(()=>
-        callback());
+    $.get('html/debug/debugger.html',(response)=>{
+
+      _debugger = $(response)
+    }).done(()=>{
+      $(`${application.object.config.main} #${application.template()}`)
+        .append(_debugger); // append debugger html
+      jshintSettings()
+
+        callback()
+    });
+
   }
 }
 const loadTimeColor = (time) => {
@@ -100,15 +110,17 @@ const getIssues = () => {
 const jshint = (source) => {
 
   let options;
-  //if(application.config.jshint){
-  //  options = application.config.jshint
-  //}else{
+  if(application.object.config.jshint){
+    options = application.object.config.jshint
+    //console.log(options)
+  }else{
     options = {
       undef: false,
       esversion : 6,
       asi : true
     }
-  //}
+    application.object.config.jshint = options
+  }
 
   const predef = { foo : false}
 
@@ -117,13 +129,114 @@ const jshint = (source) => {
   //$('#ecmascriptVersion').val(JSHINT.data().options.)
   return JSHINT.data();
 }
+const jshintSettings = (options) => {
+  const jsHintSettingsECMAScriptVersion = $('#jsHintSettingsECMAScriptVersion')
+  const jsHintOptions = application.object.config.jshint
+
+  jsHintSettingsECMAScriptVersion.val(jsHintOptions.esversion)
+  application.controller(jsHintSettingsECMAScriptVersion,'change',function(event){
+    console.log($('#jsHintSettingsECMAScriptVersion').val())
+    application.object.config.jshint.esversion = $('#jsHintSettingsECMAScriptVersion').val();
+    debugJSHint()
+  })
+  const jsHintSettingsSemicolons = $('#jsHintSettingsSemicolons')
+  if(application.object.config.jshint.asi){
+    jsHintSettingsSemicolons.attr('checked','checked')
+  }else{
+    jsHintSettingsSemicolons.attr('checked','')
+  }
+  jsHintSettingsSemicolons.on('change',function(){
+
+      application.object.config.jshint.asi ? application.object.config.jshint.asi = false : application.object.config.jshint.asi = true
+      debugJSHint()
+  })
+  const jsHintSettingsUndefined = $('#jsHintSettingsUndefined')
+  if(application.object.config.jshint.undef){
+    jsHintSettingsUndefined.attr('checked','checked')
+  }else{
+    jsHintSettingsUndefined.attr('checked','')
+  }
+  jsHintSettingsUndefined.on('change',function(){
+
+      application.object.config.jshint.undef ? application.object.config.jshint.undef = false : application.object.config.jshint.undef = true
+      debugJSHint()
+  })
+}
+const debugJSHint = () => {
+
+      const jshintModuleOutput = jshint(`application.object.${application.endpoint()}.default = ${application.object[application.endpoint()].default.toString()}`)
+      const ECMAScriptVersion = jshintModuleOutput.options.esversion;
+
+      const undef = jshintModuleOutput.options.undef ? ' not' : '';
+      const asi = jshintModuleOutput.options.asi ? ' not' : ''
+
+      $('#jshint #details').html(`ECMAScript ${ECMAScriptVersion}; Undefined variables${undef}  permitted, Semicolons(;)${asi} required`);
+      $('#jshint #errors,jshint #code').html('');
+      if(jshintModuleOutput.errors){
+        $('#jshint #errors').append(`<h5 class="text-danger"><i class="fas fa-times"></i> Module <span class="Inconsolata">assets/js/modules/${application.endpoint()}.js</span> has ${jshintModuleOutput.errors.length} Errors;</h5>`)
+      }else{
+        $('#jshint #errors').html(`<h5 class="text-success"><i class="fas fa-check"></i> Module <span class="Inconsolata">assets/js/modules/${application.endpoint()}.js</span> has no errors</h5>`)
+      }
+      if(jshintModuleOutput.errors){
+        $('.jshintErrorCount').html(jshintModuleOutput.errors.length)
+      }else{
+        $('.jshintErrorCount').html('')
+      }
+
+      for(let err in jshintModuleOutput.errors){
+        $('#jshint #errors').append(`<div class="text-danger Inconsolata"><i class="fas fa-exclamation-triangle"></i> <a href="http://linterrors.com/js?q=${jshintModuleOutput.errors[err].code}" target="_blank">${jshintModuleOutput.errors[err].code}</a> : <code>${jshintModuleOutput.errors[err].evidence}</code> on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}</div>`);
+        console.error(`JSHint ${jshintModuleOutput.errors[err].code} : ${jshintModuleOutput.errors[err].evidence} on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}`);
+      }
+      setCode(()=> aceEditor({
+        id: 'code',
+        mode : 'javascript',
+        theme : 'ace/theme/github'
+      }));
+      $('#editorTheme').on('change',function(event){
+        setCode(()=> aceEditor({
+          id: 'code',
+          mode : 'javascript',
+          theme : $('#editorTheme').val()
+        }));
+      })
+
+      $('#jshint #functions').html(``);
+      if(jshintModuleOutput.functions) {
+
+        $('#jshint .functionsHeader').html(`${jshintModuleOutput.functions.length} functions`);
+        $('#jshint #info').html('<i class="fas fa-angle-right"></i>').append(`${jshintModuleOutput.functions.length} functions (${jshintModuleOutput.functions.filter(item=>item.name === '(empty)').length} anonymous); `)
+        for(let item of jshintModuleOutput.functions){
+          let functionItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> ${item.name} (${item.line}:${item.character})</li>`)
+            .on('click',function(){
+              editor.moveCursorTo(item.line-1,item.character,false);
+              $('#jshint #functions li').removeClass('active')
+              $(this).addClass('active')
+              //editor.selectLineStart()
+            })
+          $('#jshint #functions').append(functionItem )
+        }
+      }
+      $('#jshint #implieds').html('')
+      if(jshintModuleOutput.implieds) {
+        $('#jshint #info').append(`${jshintModuleOutput.implieds.length} implieds; `)
+        $('#jshint .impliedsHeader').html(`${jshintModuleOutput.implieds.length} implieds`);
+        for(let item of jshintModuleOutput.implieds){
+          let impliedItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> <code>${item.name}</code> (${item.line})</li>`)
+          $('#jshint #implieds').append(impliedItem )
+        }
+      }
+      //console.log(jshintModuleOutput)
+
+      if(jshintModuleOutput.globals) $('#jshint #info').append(`${jshintModuleOutput.globals.length} globals; `)
+      //if(jshintModuleOutput.member) $('#jshint #info').append(`${jshintModuleOutput.member.length} member; `)
+}
 let editor,editorElement
 const aceEditor = function(args){
   //setTimeout(()=>{
     if(editor) {
       editor.destroy()
-      editor.container.remove()
-      $('#editorCol').append(editorElement)
+      //editor.container.remove()
+      //$('#editorCol').append(editorElement)
     }else{
       editorElement = $('#code')
     }
@@ -134,7 +247,7 @@ const aceEditor = function(args){
 
 }
 const setCode = function(callback){
-  $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.object[application.endpoint()[0]].default.toString()}</pre>`);
+  $('#jshint #code').html('').append(`<pre>application.object.${application.endpoint()}.default = ${application.module().default.toString()}</pre>`);
   if(callback) callback();
 }
 application.debugLog = debugLog;
@@ -142,8 +255,7 @@ application.debugger = (callback) => {
 
 // TODO: cache debugger html in one ajax call... on each init is too expensive
   debuggerStatic((callback)=>{
-    $(`${application.object.config.main} #${application.template()}`)
-      .append(_debugger); // append debugger html
+
     if(CDNs.length===0)getCDNs()
     let cdnsHtml = ''
     for(let item of CDNs){
@@ -152,7 +264,7 @@ application.debugger = (callback) => {
     $('.cdnsCount').html(CDNs.length);
     $('#cdns_ table tbody').html(cdnsHtml);
 
-
+    $('#jsHintSettingsBtn').on('click',)
     //application.render()
     $('#log').html(''); // clear log
     let module = application.module(),
@@ -219,73 +331,8 @@ application.debugger = (callback) => {
 
     }
     $('.configCount').html(Object.getOwnPropertyNames(application.object.config).length)
+    debugJSHint()
 
-
-    const jshintModuleOutput = jshint(`application.object.${application.endpoint()}.default = ${application.object[application.endpoint()].default.toString()}`)
-    const ECMAScriptVersion = jshintModuleOutput.options.esversion;
-
-    const undef = jshintModuleOutput.options.undef ? ' not' : '';
-    const asi = jshintModuleOutput.options.asi ? ' not' : ''
-
-    $('#jshint #details').html(`ECMAScript ${ECMAScriptVersion}; Undefined variables${undef}  permitted, Semicolons(;)${asi} required`);
-    $('#jshint #errors,jshint #code').html('');
-    if(jshintModuleOutput.errors){
-      $('#jshint #errors').append(`<h5 class="text-danger"><i class="fas fa-times"></i> Module <span class="Inconsolata">assets/js/modules/${application.endpoint()}.js</span> has ${jshintModuleOutput.errors.length} Errors;</h5>`)
-    }else{
-      $('#jshint #errors').html(`<h5 class="text-success"><i class="fas fa-check"></i> Module <span class="Inconsolata">assets/js/modules/${application.endpoint()}.js</span> has no errors</h5>`)
-    }
-    if(jshintModuleOutput.errors){
-      $('.jshintErrorCount').html(jshintModuleOutput.errors.length)
-    }else{
-      $('.jshintErrorCount').html('')
-    }
-
-    for(let err in jshintModuleOutput.errors){
-      $('#jshint #errors').append(`<div class="text-danger Inconsolata"><i class="fas fa-exclamation-triangle"></i> <a href="http://linterrors.com/js?q=${jshintModuleOutput.errors[err].code}" target="_blank">${jshintModuleOutput.errors[err].code}</a> : <code>${jshintModuleOutput.errors[err].evidence}</code> on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}</div>`);
-      console.error(`JSHint ${jshintModuleOutput.errors[err].code} : ${jshintModuleOutput.errors[err].evidence} on line ${jshintModuleOutput.errors[err].line} : ${jshintModuleOutput.errors[err].raw}`);
-    }
-    setCode(()=> aceEditor({
-      id: 'code',
-      mode : 'javascript',
-      theme : 'ace/theme/github'
-    }));
-    $('#editorTheme').on('change',function(event){
-      setCode(()=> aceEditor({
-        id: 'code',
-        mode : 'javascript',
-        theme : $('#editorTheme').val()
-      }));
-    })
-
-    $('#jshint #functions').html(``);
-    if(jshintModuleOutput.functions) {
-
-      $('#jshint .functionsHeader').html(`${jshintModuleOutput.functions.length} functions`);
-      $('#jshint #info').html('<i class="fas fa-angle-right"></i>').append(`${jshintModuleOutput.functions.length} functions (${jshintModuleOutput.functions.filter(item=>item.name === '(empty)').length} anonymous); `)
-      for(let item of jshintModuleOutput.functions){
-        let functionItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> ${item.name} (${item.line}:${item.character})</li>`)
-          .on('click',function(){
-            editor.moveCursorTo(item.line-1,item.character,false);
-            $('#jshint #functions li').removeClass('active')
-            $(this).addClass('active')
-            //editor.selectLineStart()
-          })
-        $('#jshint #functions').append(functionItem )
-      }
-    }
-    $('#jshint #implieds').html('')
-    if(jshintModuleOutput.implieds) {
-      $('#jshint #info').append(`${jshintModuleOutput.implieds.length} implieds; `)
-      $('#jshint .impliedsHeader').html(`${jshintModuleOutput.implieds.length} implieds`);
-      for(let item of jshintModuleOutput.implieds){
-        let impliedItem = $(`<li class="list-group-item Inconsolata hover pointer text-muted"><i class="fas fa-cog"></i> <code>${item.name}</code> (${item.line})</li>`)
-        $('#jshint #implieds').append(impliedItem )
-      }
-    }
-    console.log(jshintModuleOutput)
-
-    if(jshintModuleOutput.globals) $('#jshint #info').append(`${jshintModuleOutput.globals.length} globals; `)
-    //if(jshintModuleOutput.member) $('#jshint #info').append(`${jshintModuleOutput.member.length} member; `)
     let modal
     application.controller($('.modalswitch'),'click',function(){
 

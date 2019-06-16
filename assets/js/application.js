@@ -283,6 +283,7 @@ const application = (function(){
   },
   load = moduleRouter,
 //..............................................................................
+
   page = ( _module ) => {
     // displays page from template, execute callback and call render
     // view.main doesn't exist before first render
@@ -299,6 +300,7 @@ const application = (function(){
   },
 
 //..............................................................................
+
   templates = {},
   template = (_route, html, callback) => {
     // gets template for given or current route
@@ -432,6 +434,7 @@ const application = (function(){
 
 
     }
+
     let _endpoint = getRoute().endpoint
     let debugStr = modules().join(',').replace(_endpoint,`${_endpoint}(active)`)
     debug(`application.nav : ${debugStr}`);

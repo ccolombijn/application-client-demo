@@ -28,7 +28,8 @@
   "jshint" : {
     "undef" : false,
     "asi" : false,
-    "esversion" : 5
+    "esversion" : 6,
+    "maxerr" :250
   }
 
 }
