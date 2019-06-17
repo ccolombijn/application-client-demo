@@ -1,14 +1,15 @@
 {
-  "jquery" : { "name" : "jQuery", "docs" : "https://devdocs.io/jquery/" },
-  "bootstrap" : { "name" : "Bootstrap" },
-  "popper" : { "name" : "Popper.js"},
-  "undercore" : { "name" : "Undercore.js"},
-  "backbone" : { "name" : "Backbone.js"},
-  "react" : { "name" : "React"},
-  "vue" : { "name" : "Vue"},
-  "angular" : { "name" : "Angular"},
-  "ace" : { "name" : "Ace Editor"},
-  "showdown" : { "name" : "Showdown"},
-  "codemirror" : { "name" : "Codemirror"},
-  "jshint" : { "name" : "JSHint"}
+  "jquery" : { "name" : "jQuery", "docs" : "https://devdocs.io/jquery/", "pkg" : "" },
+  "bootstrap" : { "name" : "Bootstrap", "docs" : "https://devdocs.io/bootstrap/", "pkg" : ""},
+  "popper" : { "name" : "Popper.js", "docs" : "https://devdocs.io/bootstrap/", "pkg" : ""},
+  "undercore" : { "name" : "Undercore.js", "docs" : "https://devdocs.io/underscore/", "pkg" : ""},
+  "backbone" : { "name" : "Backbone.js", "docs" : "https://devdocs.io/backbone/", "pkg" : ""},
+  "react" : { "name" : "React", "docs" : "https://devdocs.io/react/", "pkg" : ""},
+  "vue" : { "name" : "Vue", "docs" : "https://devdocs.io/vue/", "pkg" : ""},
+  "angular" : { "name" : "Angular", "docs" : "https://devdocs.io/angular/", "pkg" : ""},
+  "ace" : { "name" : "Ace Editor", "docs" : "https://ace.c9.io/#nav=api", "pkg" : ""},
+  "showdown" : { "name" : "Showdown", "docs" : "https://github.com/showdownjs/showdown/wiki", "pkg" : ""},
+  "codemirror" : { "name" : "Codemirror", "docs" : "https://codemirror.net/doc/manual.html", "pkg" : ""},
+  "jshint" : { "name" : "JSHint", "docs" : "https://jshint.com/docs/", "pkg" : ""},
+  "mustache" : {"name" : "Mustache", "docs" : "http://mustache.github.io/mustache.5.html", "pkg" : ""}
 }

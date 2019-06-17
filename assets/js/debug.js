@@ -10,11 +10,13 @@ const debuggerStatic = (callback) => {
   if(_debugger){
     $(`${application.object.config.main} #${application.template()}`)
       .append(_debugger);
+      jshintSettings()
     callback();
   }else{
     $.get('html/debug/debugger.html',(response)=>{
 
       _debugger = $(response)
+      
     }).done(()=>{
       $(`${application.object.config.main} #${application.template()}`)
         .append(_debugger); // append debugger html
